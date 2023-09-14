@@ -2,8 +2,8 @@ import re
 import sqlite3
 import os
 import tkinter
-from tkinter import *
-from tkinter.ttk import *
+
+import customtkinter
 
 
 
@@ -43,43 +43,82 @@ cursor.execute(sql)
 conn.commit()
 cursor.close()"""
 
+
+
+
+
 class App:
+    def __init__(self, root = customtkinter.CTk()):
 
-    def __init__(self, root):
         self.root = root
-        self.username = None
-        self.pasword = None
-
-    def login_page(self):
-        self.root.geometry("800x800")
-        self.root.title("bycle map")
-
-        root_title = tkinter.Label(self.root, text="login page", font="arial")
-        root_title.pack()
+        self.root.geometry("800x600")
+        self.root.title("Bycyle land")
+        self.username = customtkinter.StringVar()
+        self.pasword = customtkinter.StringVar()
 
 
-        frame = tkinter.Frame(self.root, borderwidth=2)
+
+    def manager(self):
+        """This function will manage the aplication by running the respective funtions"""
+
+        self.login()
+
+        self.root.mainloop()
+
+    def login(self):
+        """This function will load the login GUI"""
+
+        frame = customtkinter.CTkFrame(self.root, fg_color="blue")
         frame.pack()
+        label = customtkinter.CTkLabel(frame, text="login page")
+        label.pack()
 
-        username_label = tkinter.Label(frame, text='Username', font=('calibre', 10, 'bold'))
-        username_label.pack()
-        entry_username = tkinter.Entry(frame)
+        label_username = customtkinter.CTkLabel(frame, text="user name:")
+        label_username.pack()
+
+        entry_username = customtkinter.CTkEntry(frame, placeholder_text="username",
+                                                     textvariable=self.username)
         entry_username.pack()
 
-        password_label = tkinter.Label(frame, text='Username', font=('calibre', 10, 'bold'))
-        password_label.pack()
-        entry_password = tkinter.Entry(frame, show="*")
+        label_password = customtkinter.CTkLabel(frame, text="password: ")
+        label_password.pack()
+
+        entry_password = customtkinter.CTkEntry(frame, placeholder_text="password", textvariable=self.pasword)
         entry_password.pack()
 
-        login_button = tkinter.Button(frame, text="login")
+        login_button = customtkinter.CTkButton(frame, text="login", command=lambda: self.login_user())
         login_button.pack()
 
-        sing_up_button = tkinter.Button(frame, text="sign up")
-        sing_up_button.pack()
+
+        sign_up_button = customtkinter.CTkButton(frame, text="sign up", command=lambda: self.sign_up())
+        sign_up_button.pack()
+
+    def login_user(self):
+        self.logged_in = True
+
+    def sign_up(self):
+        """this function will load the register page"""
+        frame = customtkinter.CTkFrame(self.root, fg_color="red")
+        frame.pack()
+
+        specifications_username = customtkinter.CTkLabel(frame, text="The username should be at least 6 characters long and should only contain "
+                                                          "numbers, letters, hyphens and underscores.")
+        specifications_username.pack()
+
+        entry_username = customtkinter.CTkEntry(frame, placeholder_text="username")
+        entry_username.pack()
+
+        specifications_password = customtkinter.CTkLabel(frame, text="the password should be at least 8 characters long and should contain a "
+                                                              "number, a letter and a special symbol ! # $ % & * + - , . : ; ? @ ~")
+        specifications_password.pack()
+
+        entry_password = customtkinter.CTkEntry(frame, placeholder_text="password")
+        entry_password.pack()
+
+app = App()
+app.manager()
 
 
-root = tkinter.Tk()
-app = App(root)
-app.login_page()
-root.mainloop()
+
+
 
