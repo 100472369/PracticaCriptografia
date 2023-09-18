@@ -28,7 +28,7 @@ class tkinterApp(customtkinter.CTk):
         # give title to app
         self.title("Bycycle Land")
         # change geometry
-        self.geometry("800x800")
+        self.geometry("1000x1000")
 
         # creating a container
         container = customtkinter.CTkFrame(self)
@@ -52,7 +52,7 @@ class tkinterApp(customtkinter.CTk):
 
             frame.grid(row=0, column=0, sticky="nsew")
 
-        self.show_frame(Add_journey)
+        self.show_frame(Login)
 
 
 
@@ -237,24 +237,97 @@ class Main_page(customtkinter.CTkFrame):
 class Add_journey(customtkinter.CTkFrame):
     def __init__(self, parent, controller):
         customtkinter.CTkFrame.__init__(self, parent)
+        self.atribute_dict = {"start": customtkinter.StringVar(), "finish": customtkinter.StringVar(),
+                              "distance": customtkinter.StringVar(), "travel method": customtkinter.StringVar(),
+                              "duration":customtkinter.StringVar(),
+                              "elevation": customtkinter.StringVar(), "city": customtkinter.StringVar()}
 
 
 
+        list_values = list(self.atribute_dict.keys())
 
-        columns = 5
-        for j in range(columns):
-            label = customtkinter.CTkLabel(self, text="atribute")
+        j = 0
+        for item in list_values:
+            label = customtkinter.CTkLabel(self, text=f"{item}")
             label.grid(row=1, column=j)
-            entry = customtkinter.CTkEntry(self, placeholder_text="hello")
+            entry = customtkinter.CTkEntry(self, placeholder_text="atribute", textvariable=self.atribute_dict[f"{item}"])
             entry.grid(row=2, column=j)
+            j += 1
+
+        button = customtkinter.CTkButton(self, text="ADD JOURNEY", command=lambda: self.add_to_database())
+        button.grid(row=4, column=3)
+
+    def add_to_database(self):
+        cwd = os.getcwd()
+        sqlite_file = cwd + r"/database_project"
+        conn = sqlite3.connect(sqlite_file)
+        cursor = conn.cursor()
 
 
+        # create table
+        sql = ("""create table if not exists bike_routes
+        (start         TEXT, 
+        finish        TEXT, 
+        distance      REAL, 
+        travel_method TEXT, 
+        elevation     REAL, 
+        city          TEXT, 
+        username      TEXT 
+        constraint "bike routes___fk" references users);""")
+        cursor.execute(sql)
 
+        # insert into table
+        sql = ("""insert into  bike_routes(start, finish, distance, travel_method, duration, elevation, city)
+            values (?, ?, ?, ?, ?, ?, ?)""")
+
+        tuple_insert = (self.atribute_dict["start"].get(), self.atribute_dict["finish"].get(),
+                             int(self.atribute_dict["distance"].get()), self.atribute_dict["travel method"].get(),
+                            int(self.atribute_dict["duration"].get()),
+                             int(self.atribute_dict["elevation"].get()), self.atribute_dict["city"].get())
+        cursor.execute(sql, tuple_insert)
+
+
+        conn.commit()
+        cursor.close()
 
 class View_journeys(customtkinter.CTkFrame):
 
     def __init__(self, parent, controller):
         customtkinter.CTkFrame.__init__(self, parent)
+        rows = None
+        columns = None
+
+        cwd = os.getcwd()
+        sqlite_file = cwd + r"/database_project"
+        conn = sqlite3.connect(sqlite_file)
+        cursor = conn.cursor()
+
+        sql = ("select start, finish, distance,travel_method, duration, elevation, city from bike_routes;")
+        cursor.execute(sql)
+        query = cursor.fetchall()
+
+
+        atribute_names = ["start", "finish", "distance", "travel method", "duration", "elevation", "city"]
+
+
+        # cree estos entries para que se aline la info no se como todo
+        for i in range(7):
+            entry = customtkinter.CTkEntry(self, placeholder_text=f"{atribute_names[i]}")
+            entry.grid(row =1, column=i)
+
+
+
+        i = 2
+        for item in query:
+
+            for j in range(len(item)):
+                label = customtkinter.CTkLabel(self, text=f"{item[j]}")
+                label.grid(row=i, column=j)
+            i += 1
+
+
+
+
 
 
 
