@@ -28,7 +28,7 @@ class tkinterApp(customtkinter.CTk):
         # give title to app
         self.title("Bycycle Land")
         # change geometry
-        self.geometry("800x800")
+        self.geometry("1000x1000")
 
         # creating a container
         container = customtkinter.CTkFrame(self)
@@ -42,7 +42,7 @@ class tkinterApp(customtkinter.CTk):
 
         # iterating through a tuple consisting
         # of the different page layouts
-        for F in (Login, Sign_up, Main_page):
+        for F in (Login, Sign_up, Main_page, Add_journey, View_journeys):
             frame = F(container, self)
 
             # initializing frame of that object from
@@ -53,6 +53,7 @@ class tkinterApp(customtkinter.CTk):
             frame.grid(row=0, column=0, sticky="nsew")
 
         self.show_frame(Login)
+
 
 
 
@@ -73,27 +74,38 @@ class Login(customtkinter.CTkFrame):
 
 
         customtkinter.CTkFrame.__init__(self, parent)
+        # this is used to center all the elemetns
+        self.grid_columnconfigure(0, weight=2)
+        self.grid_columnconfigure(4, weight=2)
+
 
         label = customtkinter.CTkLabel(self, text="login page")
-        label.pack()
+        label.grid(row=1, column=2)
+
 
         label_username = customtkinter.CTkLabel(self, text="user name:")
-        label_username.pack()
+        label_username.grid(row=2, column=1)
+
 
         entry_username = customtkinter.CTkEntry(self, placeholder_text="username", textvariable=self.username)
-        entry_username.pack()
+        entry_username.grid(row=2, column=2)
+
 
         label_password = customtkinter.CTkLabel(self, text="password: ")
-        label_password.pack()
+        label_password.grid(row=3, column=1)
+
 
         entry_password = customtkinter.CTkEntry(self, placeholder_text="password", textvariable=self.password)
-        entry_password.pack()
+        entry_password.grid(row=3, column=2)
+
 
         login_button = customtkinter.CTkButton(self, text="login", command= lambda: self.log_user(controller))
-        login_button.pack()
+        login_button.grid(row=4, column=2)
+
 
         sign_up_button = customtkinter.CTkButton(self, text="sign up", command= lambda: controller.show_frame(Sign_up))
-        sign_up_button.pack()
+        sign_up_button.grid(row=5, column=2)
+
 
     def log_user(self, controller):
 
@@ -128,29 +140,35 @@ class Sign_up(customtkinter.CTkFrame):
         self.password = customtkinter.StringVar()
 
 
-
         customtkinter.CTkFrame.__init__(self, parent)
+
+
+
+
         label = customtkinter.CTkLabel(self, text="Sign Up")
-        label.pack()
+        label.grid(row=1, column=1)
 
         specifications_username = customtkinter.CTkLabel(self,
                                                          text="The username should be at least 6 characters long and should only contain "
                                                               "numbers, letters, hyphens and underscores.")
-        specifications_username.pack()
+        specifications_username.grid(row=2, column=1)
 
         entry_username = customtkinter.CTkEntry(self, placeholder_text="username", textvariable=self.username)
-        entry_username.pack()
+        entry_username.grid(row=3, column=1)
 
         specifications_password = customtkinter.CTkLabel(self,
-                                                         text="the password should be at least 8 characters long and should contain a "
-                                                              "number, a letter and a special symbol ! # $ % & * + - , . : ; ? @ ~")
-        specifications_password.pack()
+                                                         text="          The password should be at least 8 characters "
+                                                              "long and should contain a "
+                                                              "number, a letter and a special symbol "
+                                                              "! # $ % & * + - , . : ; ? @ ~")
+        specifications_password.grid(row=4, column=1)
+
 
         entry_password = customtkinter.CTkEntry(self, placeholder_text="password", textvariable=self.password)
-        entry_password.pack()
+        entry_password.grid(row=5, column=1)
 
         sign_up_button = customtkinter.CTkButton(self, text="Sign Up", command= lambda: self.sign_up_regex(controller))
-        sign_up_button.pack()
+        sign_up_button.grid(row=6, column=1)
 
 
     def sign_up_regex(self, controller):
@@ -198,26 +216,122 @@ class Sign_up(customtkinter.CTkFrame):
 class Main_page(customtkinter.CTkFrame):
     def __init__(self, parent, controller):
         customtkinter.CTkFrame.__init__(self, parent)
-        label = customtkinter.CTkLabel(self, text="Page 2")
-        label.grid(row=0, column=4, padx=10, pady=10)
+        self.grid_columnconfigure(0, weight=1)
 
-        # button to show frame 2 with text
-        # layout2
-        button1 = customtkinter.CTkButton(self, text="Page 1",
-                                          command=lambda: controller.show_frame(Sign_up))
+        welcome_message = customtkinter.CTkLabel(self, text="Welcome to bike land")
+        welcome_message.grid()
 
-        # putting the button in its place by
-        # using grid
-        button1.grid(row=1, column=1, padx=10, pady=10)
 
-        # button to show frame 3 with text
-        # layout3
-        button2 = customtkinter.CTkButton(self, text="Startpage",
-                                          command=lambda: controller.show_frame(Login))
+        options_message = (customtkinter.CTkLabel(self, text="You have two options: "
+                                                              "\n1) add a journey \n2) view added journeys"))
+        options_message.grid()
 
-        # putting the button in its place by
-        # using grid
-        button2.grid(row=2, column=1, padx=10, pady=10)
+        add_journey = customtkinter.CTkButton(self, text="Add a journey",
+         command=lambda: controller.show_frame(Add_journey))
+        add_journey.grid()
+
+        view_journeys = customtkinter.CTkButton(self, text="View journeys",
+                                command=lambda: controller.show_frame(View_journeys))
+        view_journeys.grid()
+
+class Add_journey(customtkinter.CTkFrame):
+    def __init__(self, parent, controller):
+        customtkinter.CTkFrame.__init__(self, parent)
+        self.atribute_dict = {"start": customtkinter.StringVar(), "finish": customtkinter.StringVar(),
+                              "distance": customtkinter.StringVar(), "travel method": customtkinter.StringVar(),
+                              "duration":customtkinter.StringVar(),
+                              "elevation": customtkinter.StringVar(), "city": customtkinter.StringVar()}
+
+
+
+        list_values = list(self.atribute_dict.keys())
+
+        j = 0
+        for item in list_values:
+            label = customtkinter.CTkLabel(self, text=f"{item}")
+            label.grid(row=1, column=j)
+            entry = customtkinter.CTkEntry(self, placeholder_text="atribute", textvariable=self.atribute_dict[f"{item}"])
+            entry.grid(row=2, column=j)
+            j += 1
+
+        button = customtkinter.CTkButton(self, text="ADD JOURNEY", command=lambda: self.add_to_database())
+        button.grid(row=4, column=3)
+
+    def add_to_database(self):
+        cwd = os.getcwd()
+        sqlite_file = cwd + r"/database_project"
+        conn = sqlite3.connect(sqlite_file)
+        cursor = conn.cursor()
+
+
+        # create table
+        sql = ("""create table if not exists bike_routes
+        (start         TEXT, 
+        finish        TEXT, 
+        distance      REAL, 
+        travel_method TEXT, 
+        elevation     REAL, 
+        city          TEXT, 
+        username      TEXT 
+        constraint "bike routes___fk" references users);""")
+        cursor.execute(sql)
+
+        # insert into table
+        sql = ("""insert into  bike_routes(start, finish, distance, travel_method, duration, elevation, city)
+            values (?, ?, ?, ?, ?, ?, ?)""")
+
+        tuple_insert = (self.atribute_dict["start"].get(), self.atribute_dict["finish"].get(),
+                             int(self.atribute_dict["distance"].get()), self.atribute_dict["travel method"].get(),
+                            int(self.atribute_dict["duration"].get()),
+                             int(self.atribute_dict["elevation"].get()), self.atribute_dict["city"].get())
+        cursor.execute(sql, tuple_insert)
+
+
+        conn.commit()
+        cursor.close()
+
+class View_journeys(customtkinter.CTkFrame):
+
+    def __init__(self, parent, controller):
+        customtkinter.CTkFrame.__init__(self, parent)
+        rows = None
+        columns = None
+
+        cwd = os.getcwd()
+        sqlite_file = cwd + r"/database_project"
+        conn = sqlite3.connect(sqlite_file)
+        cursor = conn.cursor()
+
+        sql = ("select start, finish, distance,travel_method, duration, elevation, city from bike_routes;")
+        cursor.execute(sql)
+        query = cursor.fetchall()
+
+
+        atribute_names = ["start", "finish", "distance", "travel method", "duration", "elevation", "city"]
+
+
+        # cree estos entries para que se aline la info no se como todo
+        for i in range(7):
+            entry = customtkinter.CTkEntry(self, placeholder_text=f"{atribute_names[i]}")
+            entry.grid(row =1, column=i)
+
+
+
+        i = 2
+        for item in query:
+
+            for j in range(len(item)):
+                label = customtkinter.CTkLabel(self, text=f"{item[j]}")
+                label.grid(row=i, column=j)
+            i += 1
+
+
+
+
+
+
+
+
 
 app = tkinterApp()
 app.mainloop()
