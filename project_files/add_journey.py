@@ -1,7 +1,8 @@
 import customtkinter
 import os
 import sqlite3
-
+import main_page
+from settings import username_global
 
 class Add_journey(customtkinter.CTkFrame):
     def __init__(self, parent, controller):
@@ -26,11 +27,21 @@ class Add_journey(customtkinter.CTkFrame):
         button = customtkinter.CTkButton(self, text="ADD JOURNEY", command=lambda: self.add_to_database())
         button.grid(row=4, column=3)
 
+        return_button = customtkinter.CTkButton(self, text="RETURN TO MAIN MENU",
+                                                command=lambda:controller.show_frame(main_page.Main_page))
+        return_button.grid(row=5, column=3)
+
+
+
     def add_to_database(self):
         cwd = os.getcwd()
         sqlite_file = cwd + r"/database_project"
         conn = sqlite3.connect(sqlite_file)
         cursor = conn.cursor()
+
+        # for executing queries with foreign keys
+        cursor.execute("""PRAGMA foreign_keys=ON;""")
+
 
 
         # create table
@@ -50,9 +61,9 @@ class Add_journey(customtkinter.CTkFrame):
             values (?, ?, ?, ?, ?, ?, ?)""")
 
         tuple_insert = (self.atribute_dict["start"].get(), self.atribute_dict["finish"].get(),
-                             int(self.atribute_dict["distance"].get()), self.atribute_dict["travel method"].get(),
-                            int(self.atribute_dict["duration"].get()),
-                             int(self.atribute_dict["elevation"].get()), self.atribute_dict["city"].get())
+                             float(self.atribute_dict["distance"].get()), self.atribute_dict["travel method"].get(),
+                            float(self.atribute_dict["duration"].get()),
+                             float(self.atribute_dict["elevation"].get()), self.atribute_dict["city"].get())
         cursor.execute(sql, tuple_insert)
 
 

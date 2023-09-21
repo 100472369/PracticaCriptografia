@@ -41,6 +41,7 @@ class tkinterApp(customtkinter.CTk):
         # initializing frames to an empty array
         self.frames = {}
 
+
         # iterating through a tuple consisting
         # of the different page layouts
         for F in (Login, Sign_up, Main_page, Add_journey, View_journeys):
@@ -63,6 +64,7 @@ class tkinterApp(customtkinter.CTk):
     def show_frame(self, cont):
         frame = self.frames[cont]
         frame.tkraise()
+
 
 app = tkinterApp()
 app.mainloop()

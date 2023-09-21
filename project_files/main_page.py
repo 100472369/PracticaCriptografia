@@ -24,3 +24,4 @@ class Main_page(customtkinter.CTkFrame):
         view_journeys = customtkinter.CTkButton(self, text="View journeys",
                                 command=lambda: controller.show_frame(View_journeys))
         view_journeys.grid()
+

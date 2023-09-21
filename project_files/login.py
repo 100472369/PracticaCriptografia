@@ -3,8 +3,7 @@ import os
 import customtkinter
 from sign_up import Sign_up
 from main_page import Main_page
-
-
+from settings import username_global, pasword_global
 
 
 class Login(customtkinter.CTkFrame):
@@ -12,6 +11,8 @@ class Login(customtkinter.CTkFrame):
         # variables
         self.username = customtkinter.StringVar()
         self.password = customtkinter.StringVar()
+        self.incorrect_data = False
+
 
 
         customtkinter.CTkFrame.__init__(self, parent)
@@ -40,7 +41,7 @@ class Login(customtkinter.CTkFrame):
         entry_password.grid(row=3, column=2)
 
 
-        login_button = customtkinter.CTkButton(self, text="login", command= lambda: self.log_user(controller))
+        login_button = customtkinter.CTkButton(self, text="login", command= lambda: self.log_user(controller, incorrect_data))
         login_button.grid(row=4, column=2)
 
 
@@ -48,7 +49,13 @@ class Login(customtkinter.CTkFrame):
         sign_up_button.grid(row=5, column=2)
 
 
-    def log_user(self, controller):
+        incorrect_data = customtkinter.CTkLabel(self, text="INCORRECT USERNAME OR PASSWORD", text_color="red")
+
+
+
+
+
+    def log_user(self, controller, label):
 
         cwd = os.getcwd()
         sqlite_file = cwd + r"/database_project"
@@ -64,7 +71,10 @@ class Login(customtkinter.CTkFrame):
         tuple_username_password = cursor.fetchall()
 
         if len(tuple_username_password) == 0 or tuple_username_password[0][1] != self.password.get():
-            print("incorrect username or password")
+            label.grid(row=6, column=2)
+
         else:
             cursor.close()
+
             controller.show_frame(Main_page)
+

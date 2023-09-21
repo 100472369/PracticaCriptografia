@@ -1,12 +1,22 @@
 import customtkinter
 import os
 import sqlite3
-
+import main_page
+from settings import username_global
 
 class View_journeys(customtkinter.CTkFrame):
 
     def __init__(self, parent, controller):
         customtkinter.CTkFrame.__init__(self, parent)
+        button = customtkinter.CTkButton(self, text="RUN QUERIES", command=lambda:self.run_query(controller))
+        button.grid(row=1, column=3)
+
+        return_menu = customtkinter.CTkButton(self, text="RETURN TO MAIN MENU",
+                                              command=lambda: controller.show_frame(main_page.Main_page))
+        return_menu.grid(row=2, column=3)
+
+
+    def run_query(self, controller):
         rows = None
         columns = None
 
@@ -14,8 +24,11 @@ class View_journeys(customtkinter.CTkFrame):
         sqlite_file = cwd + r"/database_project"
         conn = sqlite3.connect(sqlite_file)
         cursor = conn.cursor()
+        # for executing queries with foreign keys
+        cursor.execute("""PRAGMA foreign_keys=ON;""")
 
-        sql = ("select start, finish, distance,travel_method, duration, elevation, city from bike_routes;")
+        sql = ("select start, finish, distance,travel_method, "
+               f"duration, elevation, city from bike_routes;")
         cursor.execute(sql)
         query = cursor.fetchall()
 
@@ -26,11 +39,11 @@ class View_journeys(customtkinter.CTkFrame):
         # cree estos entries para que se aline la info no se como todo
         for i in range(len(attribute_names)):
             entry = customtkinter.CTkEntry(self, placeholder_text=f"{attribute_names[i]}", state="disabled")
-            entry.grid(row =1, column=i)
+            entry.grid(row =3, column=i)
 
 
 
-        i = 2
+        i = 4
         for item in query:
             for j in range(len(item)):
                 label = customtkinter.CTkLabel(self, text=f"{item[j]}")
