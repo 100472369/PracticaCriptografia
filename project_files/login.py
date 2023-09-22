@@ -3,7 +3,7 @@ import os
 import customtkinter
 from sign_up import Sign_up
 from main_page import Main_page
-from settings import username_global, pasword_global
+from settings import set_value
 
 
 class Login(customtkinter.CTkFrame):
@@ -75,6 +75,7 @@ class Login(customtkinter.CTkFrame):
 
         else:
             cursor.close()
+            set_value(self.username.get())
 
             controller.show_frame(Main_page)
 

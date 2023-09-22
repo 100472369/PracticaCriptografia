@@ -3,7 +3,7 @@ import sqlite3
 import os
 import customtkinter
 from main_page import Main_page
-from settings import username_global, pasword_global
+from settings import set_value
 
 
 # second window frame page1
@@ -90,6 +90,7 @@ class Sign_up(customtkinter.CTkFrame):
             conn.commit()
             cursor.close()
 
+            set_value(self.username.get())
 
 
             controller.show_frame(Main_page)

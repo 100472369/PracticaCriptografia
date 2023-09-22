@@ -2,7 +2,7 @@ import customtkinter
 import os
 import sqlite3
 import main_page
-from settings import username_global
+from settings import get_value
 
 class View_journeys(customtkinter.CTkFrame):
 
@@ -20,6 +20,7 @@ class View_journeys(customtkinter.CTkFrame):
         rows = None
         columns = None
 
+
         cwd = os.getcwd()
         sqlite_file = cwd + r"/database_project"
         conn = sqlite3.connect(sqlite_file)
@@ -28,8 +29,8 @@ class View_journeys(customtkinter.CTkFrame):
         cursor.execute("""PRAGMA foreign_keys=ON;""")
 
         sql = ("select start, finish, distance,travel_method, "
-               f"duration, elevation, city from bike_routes;")
-        cursor.execute(sql)
+               f"duration, elevation, city from bike_routes where username=?;")
+        cursor.execute(sql, [get_value()])
         query = cursor.fetchall()
 
 
