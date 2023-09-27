@@ -1,5 +1,6 @@
 # here we define the global variables we are going to use
 
+# variable used to access foreign key data
 username_global = ""
 
 
