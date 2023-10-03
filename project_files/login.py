@@ -9,18 +9,17 @@ from settings import set_value
 class Login(customtkinter.CTkFrame):
     def __init__(self, parent, controller):
         # variables
-        self.username = customtkinter.StringVar()
-        self.password = customtkinter.StringVar()
-        self.incorrect_data = False
+        self.data = []
+
 
 
 
         customtkinter.CTkFrame.__init__(self, parent)
-        # this is used to center all the elemetns
+        # this is used to center all the elements
         self.grid_columnconfigure(0, weight=2)
         self.grid_columnconfigure(4, weight=2)
 
-
+        # labels, entries and buttons
         label = customtkinter.CTkLabel(self, text="login page")
         label.grid(row=1, column=2)
 
@@ -29,16 +28,18 @@ class Login(customtkinter.CTkFrame):
         label_username.grid(row=2, column=1)
 
 
-        entry_username = customtkinter.CTkEntry(self, placeholder_text="username", textvariable=self.username)
+        entry_username = customtkinter.CTkEntry(self, placeholder_text="username")
         entry_username.grid(row=2, column=2)
+        self.data.append(entry_username)
 
 
         label_password = customtkinter.CTkLabel(self, text="password: ")
         label_password.grid(row=3, column=1)
 
 
-        entry_password = customtkinter.CTkEntry(self, placeholder_text="password", textvariable=self.password, show="*")
+        entry_password = customtkinter.CTkEntry(self, placeholder_text="password", show="*")
         entry_password.grid(row=3, column=2)
+        self.data.append(entry_password)
 
 
         login_button = customtkinter.CTkButton(self, text="login", command= lambda: self.log_user(controller, incorrect_data))
@@ -56,26 +57,34 @@ class Login(customtkinter.CTkFrame):
 
 
     def log_user(self, controller, label):
+        """this function will try to log the user and redirect to the main page.
+        If not posible it wil display a red label error."""
 
+        #initiate sql data
         cwd = os.getcwd()
         sqlite_file = cwd + r"/database_project"
         conn = sqlite3.connect(sqlite_file)
         cursor = conn.cursor()
 
-
+        # execute query
         sql = "select username, password FROM users where username=?"
-        cursor.execute(sql, [self.username.get()])
+        cursor.execute(sql, [self.data[0].get()])
 
 
-
+        # user verification with sql data
         tuple_username_password = cursor.fetchall()
 
-        if len(tuple_username_password) == 0 or tuple_username_password[0][1] != self.password.get():
+        if len(tuple_username_password) == 0 or tuple_username_password[0][1] != self.data[1].get():
             label.grid(row=6, column=2)
 
         else:
+
+            # close cursor set the username value and show main page.
             cursor.close()
-            set_value(self.username.get())
+            set_value(self.data[0].get())
+            # remove text from entries
+            for item in self.data:
+                item.delete(0, "end")
 
             controller.show_frame(Main_page)
 

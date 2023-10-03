@@ -6,17 +6,7 @@ from add_journey import Add_journey
 from view_journeys import View_journeys
 
 
-# este es el antiguo login se usara despues por eso se queda
-# print("welcome to BikeLand.\n")
-# print("You will be asked to enter a username. The restrctions of a username are the following:\n")
-# print("The username should be at least 6 characters long and should only contain numbers, letters, \n")
-# print("hyphens and underscores.\n")
-#
-# username = input("please input your username: ")
-# print("You will be asked to enter a username. The restrctions of a password are the following:\n")
-# print("the password should be at least 8 characters long and should contain a number, a letter\n")
-# print("and a special symbol ! # $ % & * + - , . : ; ? @ ~\n")
-# password = input("please input your password: ")
+
 
 
 class tkinterApp(customtkinter.CTk):
@@ -30,6 +20,7 @@ class tkinterApp(customtkinter.CTk):
         self.title("Bycycle Land")
         # change geometry
         self.geometry("1000x1000")
+
 
         # creating a container
         container = customtkinter.CTkFrame(self)

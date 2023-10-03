@@ -8,7 +8,7 @@ class View_journeys(customtkinter.CTkFrame):
 
     def __init__(self, parent, controller):
         customtkinter.CTkFrame.__init__(self, parent)
-        button = customtkinter.CTkButton(self, text="RUN QUERIES", command=lambda:self.run_query(controller))
+        button = customtkinter.CTkButton(self, text="SHOW JOURNEYS", command=lambda:self.run_query())
         button.grid(row=1, column=3)
 
         return_menu = customtkinter.CTkButton(self, text="RETURN TO MAIN MENU",
@@ -16,7 +16,7 @@ class View_journeys(customtkinter.CTkFrame):
         return_menu.grid(row=2, column=3)
 
 
-    def run_query(self, controller):
+    def run_query(self):
         rows = None
         columns = None
 
@@ -34,12 +34,19 @@ class View_journeys(customtkinter.CTkFrame):
         query = cursor.fetchall()
 
 
-        attribute_names = ["start", "finish", "distance", "travel method", "duration", "elevation", "city"]
+        attribute_names = ["start", "finish", "distance(kilometers)", "travel method", "duration(hours)", "elevation(meters)", "city"]
+        string_var_items = []
+        for item in attribute_names:
+            string_var_items.append(customtkinter.StringVar(self, f"{item}"))
+
+
+
+
 
 
         # cree estos entries para que se aline la info no se como todo
         for i in range(len(attribute_names)):
-            entry = customtkinter.CTkEntry(self, placeholder_text=f"{attribute_names[i]}", state="disabled")
+            entry = customtkinter.CTkEntry(self, textvariable=string_var_items[i], state="readonly")
             entry.grid(row =3, column=i)
 
 
