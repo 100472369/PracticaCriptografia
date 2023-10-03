@@ -4,7 +4,7 @@ import os
 import customtkinter
 from main_page import Main_page
 from settings import set_value
-
+from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
 
 class Sign_up(customtkinter.CTkFrame):
@@ -123,8 +123,9 @@ class Sign_up(customtkinter.CTkFrame):
         cursor = conn.cursor()
         # create table
         sql = ("create table if not exists users "
-               "(username TEXT not null constraint users_pk primary key, password TEXT not null,"
-               "email TEXT not null, phone_number TEXT not null );")
+               "(username TEXT not null constraint users_pk primary key, password BLOB not null,"
+               "email TEXT not null, phone_number TEXT not null,"
+               "salt BLOB not null);")
         cursor.execute(sql)
 
         # first check if username exists
@@ -140,12 +141,27 @@ class Sign_up(customtkinter.CTkFrame):
 
 
         else:
+
+            salt = os.urandom(64)
+            kdf = Scrypt(
+                    salt=salt,
+                    length=64,
+                    n=2**14,
+                    r=8,
+                    p=1,
+                )
+            # encrypt password
+            derived_password = kdf.derive(self.data[3].get().encode())
+
+
+
             # insert into table and log user
-            sql = """INSERT INTO users (username, email, phone_number, password) VALUES (?, ?, ?, ?)"""
+            sql = """INSERT INTO users (username, email, phone_number, password, salt) VALUES (?, ?, ?, ?, ?)"""
 
             cursor.execute(sql,
                            [self.data[0].get(), self.data[1].get(),
-                            self.data[2].get(), self.data[3].get()])
+                            self.data[2].get(), derived_password,
+                           salt])
 
             conn.commit()
             cursor.close()
