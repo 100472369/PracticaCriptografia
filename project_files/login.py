@@ -1,10 +1,12 @@
 import sqlite3
 import os
+
+import cryptography.exceptions
 import customtkinter
 from sign_up import Sign_up
 from main_page import Main_page
 from settings import set_value
-
+from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
 class Login(customtkinter.CTkFrame):
     def __init__(self, parent, controller):
@@ -67,15 +69,34 @@ class Login(customtkinter.CTkFrame):
         cursor = conn.cursor()
 
         # execute query
-        sql = "select username, password FROM users where username=?"
+        sql = "select username, password, salt FROM users where username=?"
         cursor.execute(sql, [self.data[0].get()])
 
 
         # user verification with sql data
-        tuple_username_password = cursor.fetchall()
+        database_tuple = cursor.fetchall()
 
-        if len(tuple_username_password) == 0 or tuple_username_password[0][1] != self.data[1].get():
+
+
+
+        if len(database_tuple) == 0:
             label.grid(row=6, column=2)
+            return None
+
+
+        try:
+            salt = database_tuple[0][2]
+            kdf = Scrypt(
+                salt=salt,
+                length=64,
+                n=2 ** 14,
+                r=8,
+                p=1,
+            )
+            kdf.verify(self.data[1].get().encode(), database_tuple[0][1])
+        except cryptography.exceptions.InvalidKey:
+            label.grid(row=6, column=2)
+
 
         else:
 
