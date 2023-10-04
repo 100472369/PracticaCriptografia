@@ -5,6 +5,7 @@ import customtkinter
 from main_page import Main_page
 from settings import set_value
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
+import login
 
 
 class Sign_up(customtkinter.CTkFrame):
@@ -81,6 +82,10 @@ class Sign_up(customtkinter.CTkFrame):
                                                  command= lambda: self.check_parameters(controller,
                                                                                         self.incorrect_labels))
         sign_up_button.grid(row=9, column=4)
+
+        return_menu = customtkinter.CTkButton(self, text="RETURN TO LOGIN PAGE",
+                                              command=lambda: controller.show_frame(login.Login))
+        return_menu.grid(row=10, column=4, pady=5)
 
 
 

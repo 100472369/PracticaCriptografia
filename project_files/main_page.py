@@ -24,11 +24,11 @@ class Main_page(customtkinter.CTkFrame):
 
         add_journey = customtkinter.CTkButton(self, text="Add a journey",
          command=lambda: controller.show_frame(Add_journey))
-        add_journey.grid()
+        add_journey.grid(pady=5)
 
         view_journeys = customtkinter.CTkButton(self, text="View journeys",
                                 command=lambda: controller.show_frame(View_journeys))
-        view_journeys.grid()
+        view_journeys.grid(pady=5)
 
         confirmation = customtkinter.CTkLabel(self, text="ARE YOU SURE?", text_color="RED")
         yes_button = customtkinter.CTkButton(self, text="YES", command=lambda: self.delete_user(controller))
@@ -37,7 +37,7 @@ class Main_page(customtkinter.CTkFrame):
 
         delete_account = customtkinter.CTkButton(self, text="DELETE ACCOUNT", fg_color="red",
                                                  command= lambda: self.are_you_sure(yes_button, no_button, confirmation))
-        delete_account.grid()
+        delete_account.grid(pady=5)
 
 
     def are_you_sure(self, yes, no, confirmation):

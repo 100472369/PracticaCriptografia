@@ -22,11 +22,11 @@ class Login(customtkinter.CTkFrame):
         self.grid_columnconfigure(4, weight=2)
 
         # labels, entries and buttons
-        label = customtkinter.CTkLabel(self, text="login page")
+        label = customtkinter.CTkLabel(self, text="Login Page")
         label.grid(row=1, column=2)
 
 
-        label_username = customtkinter.CTkLabel(self, text="user name:")
+        label_username = customtkinter.CTkLabel(self, text="Username:")
         label_username.grid(row=2, column=1)
 
 
@@ -35,7 +35,7 @@ class Login(customtkinter.CTkFrame):
         self.data.append(entry_username)
 
 
-        label_password = customtkinter.CTkLabel(self, text="password: ")
+        label_password = customtkinter.CTkLabel(self, text="Password: ")
         label_password.grid(row=3, column=1)
 
 
@@ -44,11 +44,11 @@ class Login(customtkinter.CTkFrame):
         self.data.append(entry_password)
 
 
-        login_button = customtkinter.CTkButton(self, text="login", command= lambda: self.log_user(controller, incorrect_data))
+        login_button = customtkinter.CTkButton(self, text="Login", command= lambda: self.log_user(controller, incorrect_data))
         login_button.grid(row=4, column=2)
 
 
-        sign_up_button = customtkinter.CTkButton(self, text="sign up", command= lambda: controller.show_frame(Sign_up))
+        sign_up_button = customtkinter.CTkButton(self, text="Sign up", command= lambda: controller.show_frame(Sign_up))
         sign_up_button.grid(row=5, column=2)
 
 

@@ -9,12 +9,11 @@ class View_journeys(customtkinter.CTkFrame):
     def __init__(self, parent, controller):
         customtkinter.CTkFrame.__init__(self, parent)
         button = customtkinter.CTkButton(self, text="SHOW JOURNEYS", command=lambda:self.run_query())
-        button.grid(row=1, column=3)
+        button.grid(row=1, column=3, pady=5)
 
         return_menu = customtkinter.CTkButton(self, text="RETURN TO MAIN MENU",
                                               command=lambda: controller.show_frame(main_page.Main_page))
-        return_menu.grid(row=2, column=3)
-
+        return_menu.grid(row=2, column=3, pady=5)
 
     def run_query(self):
         rows = None
@@ -38,9 +37,6 @@ class View_journeys(customtkinter.CTkFrame):
         string_var_items = []
         for item in attribute_names:
             string_var_items.append(customtkinter.StringVar(self, f"{item}"))
-
-
-
 
 
 

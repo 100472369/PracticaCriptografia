@@ -3,7 +3,6 @@
 # variable used to access foreign key data
 username_global = ""
 
-
 def set_value(new_value):
     global username_global
     username_global = new_value
