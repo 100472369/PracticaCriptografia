@@ -139,10 +139,10 @@ class Sign_up(customtkinter.CTkFrame):
         cursor.execute(sql, [self.data[0].get()])
 
         username = cursor.fetchall()
-        if len(username) != 0:
+        if len(username) > 0:
             for item in self.incorrect_labels:
                 item.grid_remove()
-            incorrect_labels[5].grid(row=10, column=4)
+            incorrect_labels[5].grid(row=11, column=4)
 
 
         else:
@@ -157,6 +157,8 @@ class Sign_up(customtkinter.CTkFrame):
                 )
             # encrypt password
             derived_password = kdf.derive(self.data[3].get().encode())
+
+
 
 
 
