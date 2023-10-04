@@ -11,6 +11,7 @@ class Add_journey(customtkinter.CTkFrame):
                               "distance": customtkinter.StringVar(), "travel method": customtkinter.StringVar(),
                               "duration":customtkinter.StringVar(),
                               "elevation": customtkinter.StringVar(), "city": customtkinter.StringVar()}
+        self.incorrect_labels = []
 
         # instructions
         instructions_1 = customtkinter.CTkLabel(self, text="To insert type the correct data type in each entry.")
@@ -38,22 +39,35 @@ class Add_journey(customtkinter.CTkFrame):
             j += 1
         # extra buttons
         button = customtkinter.CTkButton(self, text="ADD JOURNEY",
-                                         command=lambda: self.add_to_database(controller, incorrect_query, entry_list))
+                                         command=lambda: self.add_to_database(controller, entry_list))
         button.grid(row=6, column=3)
 
         return_button = customtkinter.CTkButton(self, text="RETURN TO MAIN MENU",
                                                 command=lambda: self.show_main_menu(controller, entry_list))
         return_button.grid(row=7, column=3)
 
-        incorrect_query = customtkinter.CTkLabel(self, text="Wrong format", text_color="red")
+        # for returning errors in insertion
+        error_text = ["INCORRECT FORMAT OF DISTANCE OR DURATION OR ELEVATION",
+                      "START, FINISH, TRAVEL METHOD, CITY CAN NOT BE EMPTY",
+                      "DISTANCE OR DURATION CAN NOT BE NEGATIVE"]
+        for item in error_text:
+            label = customtkinter.CTkLabel(self, text=f"{item}", text_color="red")
+            self.incorrect_labels.append(label)
 
 
 
 
 
-    def add_to_database(self, controller, label, entry_list):
+
+    def add_to_database(self, controller, entry_list):
         """This function will insert the data into the database and return the user to the main page.
         If it gets and error while inserting then it will display a red warning label."""
+
+        # delete previous incorrect labels
+        for item in self.incorrect_labels:
+            item.grid_remove()
+
+
         cwd = os.getcwd()
         sqlite_file = cwd + r"/database_project"
         conn = sqlite3.connect(sqlite_file)
@@ -87,14 +101,16 @@ class Add_journey(customtkinter.CTkFrame):
                         float(self.atribute_dict["elevation"].get()), self.atribute_dict["city"].get(),
                         get_value())
         except ValueError:
-            label.grid(row=8, column=3)
+            self.incorrect_labels[0].grid(row=8, column=3)
             return None
 
         for i in tuple_insert:
-
             if not str(i).strip():
-                label.grid(row=8, column=3)
+                self.incorrect_labels[1].grid(row=8, column=3)
                 return None
+        if tuple_insert[2] < 0 or tuple_insert[4] < 0:
+            self.incorrect_labels[2].grid(row=8, column=3)
+            return None
 
         # insert into table
         sql = ("""insert into  bike_routes(start, finish, distance, travel_method, duration, elevation, city, username)
