@@ -79,6 +79,7 @@ class Login(customtkinter.CTkFrame):
 
 
 
+
         if len(database_tuple) == 0:
             label.grid(row=6, column=2)
             return None
@@ -88,11 +89,12 @@ class Login(customtkinter.CTkFrame):
             salt = database_tuple[0][2]
             kdf = Scrypt(
                 salt=salt,
-                length=64,
+                length=32,
                 n=2 ** 14,
                 r=8,
                 p=1,
             )
+
             kdf.verify(self.data[1].get().encode(), database_tuple[0][1])
         except cryptography.exceptions.InvalidKey:
             label.grid(row=6, column=2)

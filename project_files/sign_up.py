@@ -3,8 +3,9 @@ import sqlite3
 import os
 import customtkinter
 from main_page import Main_page
-from settings import set_value
+from settings import set_value, get_encryption_key
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
+from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 import login
 
 
@@ -12,8 +13,10 @@ class Sign_up(customtkinter.CTkFrame):
 
     def __init__(self, parent, controller):
         #variables
-        self.data = []
+        self.data = {"username": None, "email": None, "phone": None, "password": None, "repeat_password": None}
+        self.manipulated_data = {"password": None, "salt": None, "email": None, "phone": None}
         self.incorrect_labels = []
+        self.nonce = {"email": None, "phone": None}
 
 
         customtkinter.CTkFrame.__init__(self, parent)
@@ -33,19 +36,19 @@ class Sign_up(customtkinter.CTkFrame):
         username.grid(row=3, column=3)
         entry_username = customtkinter.CTkEntry(self, placeholder_text="username")
         entry_username.grid(row=3, column=5)
-        self.data.append(entry_username)
+        self.data["username"] = entry_username
 
         email = customtkinter.CTkLabel(self, text="email:")
         email.grid(row=4, column=3)
         email_entry=customtkinter.CTkEntry(self, placeholder_text="email")
         email_entry.grid(row=4, column=5)
-        self.data.append(email_entry)
+        self.data["email"] = email_entry
 
         phone = customtkinter.CTkLabel(self, text="phone number:")
         phone.grid(row=5, column=3)
         phone_entry = customtkinter.CTkEntry(self, placeholder_text="phone")
         phone_entry.grid(row=5, column=5)
-        self.data.append(phone_entry)
+        self.data["phone"] = phone_entry
 
 
         specifications_password = customtkinter.CTkLabel(self,
@@ -61,14 +64,14 @@ class Sign_up(customtkinter.CTkFrame):
         password.grid(row=7, column=3)
         entry_password = customtkinter.CTkEntry(self, placeholder_text="password", show="*")
         entry_password.grid(row=7, column=5)
-        self.data.append(entry_password)
+        self.data["password"] = entry_password
 
 
         repeat_password = customtkinter.CTkLabel(self, text="repeat password:")
         repeat_password.grid(row=8, column=3)
         repeat_password_entry = customtkinter.CTkEntry(self, placeholder_text="password", show="*")
         repeat_password_entry.grid(row=8, column=5)
-        self.data.append(repeat_password_entry)
+        self.data["repeat_password"] = repeat_password_entry
 
         # format errors
         text_display = ["WRONG FORMAT USERNAME", "WRONG FORMAT EMAIL", "WRONG FORMAT PHONE", "WRONG FORMAT PASSWORD",
@@ -102,19 +105,19 @@ class Sign_up(customtkinter.CTkFrame):
         for item in self.incorrect_labels:
             item.grid_remove()
 
-        if re.fullmatch(regex_username, self.data[0].get()) is None:
-            incorrect_labels[0].grid(row=10, column=4)
+        if re.fullmatch(regex_username, self.data["username"].get()) is None:
+            incorrect_labels[0].grid(row=11, column=4)
 
-        elif re.fullmatch(regex_email, self.data[1].get()) is None:
-            incorrect_labels[1].grid(row=10, column=4)
+        elif re.fullmatch(regex_email, self.data["email"].get()) is None:
+            incorrect_labels[1].grid(row=11, column=4)
 
-        elif re.fullmatch(regex_phone, self.data[2].get()) is None:
-            incorrect_labels[2].grid(row=10, column=4)
+        elif re.fullmatch(regex_phone, self.data["phone"].get()) is None:
+            incorrect_labels[2].grid(row=11, column=4)
 
-        elif re.fullmatch(regex_password, self.data[3].get()) is None:
-            incorrect_labels[3].grid(row=10, column=4)
-        elif self.data[3].get() != self.data[4].get():
-            incorrect_labels[4].grid(row=10, column=4)
+        elif re.fullmatch(regex_password, self.data["password"].get()) is None:
+            incorrect_labels[3].grid(row=11, column=4)
+        elif self.data["password"].get() != self.data["repeat_password"].get():
+            incorrect_labels[4].grid(row=11, column=4)
         else:
 
             self.register_user(controller, incorrect_labels)
@@ -136,7 +139,7 @@ class Sign_up(customtkinter.CTkFrame):
         # first check if username exists
 
         sql = "select username from users where username=?"
-        cursor.execute(sql, [self.data[0].get()])
+        cursor.execute(sql, [self.data["username"].get()])
 
         username = cursor.fetchall()
         if len(username) > 0:
@@ -147,37 +150,72 @@ class Sign_up(customtkinter.CTkFrame):
 
         else:
 
-            salt = os.urandom(64)
-            kdf = Scrypt(
-                    salt=salt,
-                    length=64,
-                    n=2**14,
-                    r=8,
-                    p=1,
-                )
-            # encrypt password
-            derived_password = kdf.derive(self.data[3].get().encode())
-
-
-
+            self.derive_password()
+            self.encrypt_data()
 
 
             # insert into table and log user
-            sql = """INSERT INTO users (username, email, phone_number, password, salt) VALUES (?, ?, ?, ?, ?)"""
+            sql = """INSERT INTO users (username, email, phone_number, password, salt, nonce_email, nonce_phone_number) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)"""
 
             cursor.execute(sql,
-                           [self.data[0].get(), self.data[1].get(),
-                            self.data[2].get(), derived_password,
-                           salt])
+                           [self.data["username"].get(), self.manipulated_data["email"],
+                            self.manipulated_data["phone"], self.manipulated_data["password"],
+                            self.manipulated_data["salt"], self.nonce["email"], self.nonce["phone"]])
 
             conn.commit()
             cursor.close()
 
-            set_value(self.data[0].get())
+            set_value(self.data["username"].get())
 
             # remove text from entries
-            for item in self.data:
+            for item in self.data.values():
                 item.delete(0, "end")
 
 
             controller.show_frame(Main_page)
+
+    def derive_password(self):
+        """This function will generate a salt and KDF to derive the user's password."""
+        salt = os.urandom(32)
+
+        kdf = Scrypt(
+            salt=salt,
+            length=32,
+            n=2 ** 14,
+            r=8,
+            p=1,
+        )
+        # encrypt password
+        derived_password = kdf.derive(self.data["password"].get().encode())
+        self.manipulated_data["password"] = derived_password
+        self.manipulated_data["salt"] = salt
+
+        return None
+
+    def encrypt_data(self):
+        """This function will generate a nonce for each encrypted item (3) and will encrypt said items"""
+
+        key = get_encryption_key()
+
+        #create the 3 nonce's for each encrytption
+        # email
+        self.nonce["email"] = os.urandom(12)
+        # phone
+        self.nonce["phone"] = os.urandom(12)
+
+        # initialize chacha
+        chacha = ChaCha20Poly1305(key)
+
+        keys = list(self.nonce.keys())
+
+        i = 0
+        for item in self.nonce.values():
+            encrypted_item = chacha.encrypt(item, self.data[f"{keys[i]}"].get().encode(), None)
+            self.manipulated_data[f"{keys[i]}"] = encrypted_item
+            i += 1
+
+
+
+
+
