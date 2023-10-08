@@ -1,26 +1,21 @@
 import customtkinter
 from login import Login
-from sign_up import Sign_up
-from main_page import Main_page
-from add_journey import Add_journey
-from view_journeys import View_journeys
+from signup import SignUp
+from mainpage import MainPage
+from addjourney import AddJourney
+from viewjourneys import ViewJourneys
 
 
-
-
-
-class tkinterApp(customtkinter.CTk):
-
-    # __init__ function for class tkinterApp
+class Tkinterapp(customtkinter.CTk):
+    """Main class for our app. Where all the different frames are created."""
     def __init__(self, *args, **kwargs):
-        # __init__ function for class Tk
+        """Init method for class."""
         customtkinter.CTk.__init__(self, *args, **kwargs)
 
         # give title to app
         self.title("Bycycle Land")
         # change geometry
         self.geometry("1000x1000")
-
 
         # creating a container
         container = customtkinter.CTkFrame(self)
@@ -32,14 +27,12 @@ class tkinterApp(customtkinter.CTk):
         # initializing frames to an empty array
         self.frames = {}
 
-
         # iterating through a tuple consisting
         # of the different page layouts
-        for F in (Login, Sign_up, Main_page, Add_journey, View_journeys):
+        for F in (Login, SignUp, MainPage, AddJourney, ViewJourneys):
             frame = F(container, self)
 
             # initializing frame of that object from
-            # startpage, page1, page2 respectively with
             # for loop
             self.frames[F] = frame
 
@@ -47,15 +40,11 @@ class tkinterApp(customtkinter.CTk):
 
         self.show_frame(Login)
 
-
-
-
-    # to display the current frame passed as
-    # parameter
     def show_frame(self, cont):
+        """Used to display the frame passed as parameter"""
         frame = self.frames[cont]
         frame.tkraise()
 
 
-app = tkinterApp()
+app = Tkinterapp()
 app.mainloop()

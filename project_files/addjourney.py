@@ -1,14 +1,17 @@
 import customtkinter
 import os
 import sqlite3
-import main_page
+import mainpage
 from settings import get_value, get_encryption_key
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 
-class Add_journey(customtkinter.CTkFrame):
+
+class AddJourney(customtkinter.CTkFrame):
+    """This is the Add journey frame for our app."""
+
     def __init__(self, parent, controller):
         customtkinter.CTkFrame.__init__(self, parent)
-        self.atribute_dict = {"start": customtkinter.StringVar(), "finish": customtkinter.StringVar(),
+        self.attribute_dict = {"start": customtkinter.StringVar(), "finish": customtkinter.StringVar(),
                               "distance": customtkinter.StringVar(), "activity type": customtkinter.StringVar(),
                               "duration": customtkinter.StringVar(),
                               "elevation": customtkinter.StringVar(), "city": customtkinter.StringVar()}
@@ -19,24 +22,26 @@ class Add_journey(customtkinter.CTkFrame):
         # instructions
         instructions_1 = customtkinter.CTkLabel(self, text="To insert type the correct data type in each entry.")
         instructions_1.grid(row=1, column=2, columnspan=3)
-        instructions_2 = customtkinter.CTkLabel(self, text="START: text, FINISH: text, DISTANCE: number(kilometers), ACTIVITY TYPE: text")
+        instructions_2 = customtkinter.CTkLabel(self,
+                                                text="START: text, FINISH: text, "
+                                                     "DISTANCE: number(kilometers), ACTIVITY TYPE: text")
         instructions_2.grid(row=2, column=2, columnspan=3)
-        instructions_3 = customtkinter.CTkLabel(self, text="DURATION: number (hours), ELEVATION: number (meters), CITY: TEXT")
+        instructions_3 = customtkinter.CTkLabel(self,
+                                                text="DURATION: number (hours), ELEVATION: number (meters), CITY: TEXT")
         instructions_3.grid(row=3, column=2, columnspan=3)
 
-
-
-        # this is used for deleteing the entries once an operation is complete
+        # this is used for deleting the entries once an operation is complete
         entry_list = []
         # used for giving values to labels
-        list_values = list(self.atribute_dict.keys())
+        list_values = list(self.attribute_dict.keys())
 
         # create labels and entries
         j = 0
         for item in list_values:
             label = customtkinter.CTkLabel(self, text=f"{item}")
             label.grid(row=4, column=j)
-            entry = customtkinter.CTkEntry(self, placeholder_text="atribute", textvariable=self.atribute_dict[f"{item}"])
+            entry = customtkinter.CTkEntry(self, placeholder_text="atribute",
+                                           textvariable=self.attribute_dict[f"{item}"])
             entry.grid(row=5, column=j)
             entry_list.append(entry)
             j += 1
@@ -57,11 +62,6 @@ class Add_journey(customtkinter.CTkFrame):
             label = customtkinter.CTkLabel(self, text=f"{item}", text_color="red")
             self.incorrect_labels.append(label)
 
-
-
-
-
-
     def add_to_database(self, controller, entry_list):
         """This function will insert the data into the database and return the user to the main page.
         If it gets and error while inserting then it will display a red warning label."""
@@ -70,7 +70,6 @@ class Add_journey(customtkinter.CTkFrame):
         for item in self.incorrect_labels:
             item.grid_remove()
 
-
         cwd = os.getcwd()
         sqlite_file = cwd + r"/database_project"
         conn = sqlite3.connect(sqlite_file)
@@ -78,7 +77,6 @@ class Add_journey(customtkinter.CTkFrame):
 
         # for executing queries with foreign keys
         cursor.execute("""PRAGMA foreign_keys=ON;""")
-
 
         # create table
         sql = ("""create table if not exists bike_routes
@@ -99,26 +97,11 @@ class Add_journey(customtkinter.CTkFrame):
                             references users
                 );""")
         cursor.execute(sql)
-
-        # insert into
-        try:
-            tuple_check_parameters = (self.atribute_dict["start"].get(), self.atribute_dict["finish"].get(),
-                        float(self.atribute_dict["distance"].get()), self.atribute_dict["activity type"].get(),
-                        float(self.atribute_dict["duration"].get()),
-                        float(self.atribute_dict["elevation"].get()), self.atribute_dict["city"].get(),
-                        get_value())
-        except ValueError:
-            self.incorrect_labels[0].grid(row=8, column=3)
+        # check parameters
+        if self.check_parameters() is False:
             return None
 
-        for i in tuple_check_parameters:
-            if not str(i).strip():
-                self.incorrect_labels[1].grid(row=8, column=3)
-                return None
-        if tuple_check_parameters[2] < 0 or tuple_check_parameters[4] < 0:
-            self.incorrect_labels[2].grid(row=8, column=3)
-            return None
-
+        # encypt the data before inserting to table
         self.encrypt_data()
 
         # insert into table
@@ -126,46 +109,61 @@ class Add_journey(customtkinter.CTkFrame):
         city, username, nonce_start, nonce_finish, nonce_activity_type, nonce_city)
             values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""")
 
-
         cursor.execute(sql, [self.encrypted_data["start"], self.encrypted_data["finish"],
-                             float(self.atribute_dict["distance"].get()), self.encrypted_data["activity type"],
-                             float(self.atribute_dict["duration"].get()), float(self.atribute_dict["elevation"].get()),
+                             float(self.attribute_dict["distance"].get()), self.encrypted_data["activity type"],
+                             float(self.attribute_dict["duration"].get()),
+                             float(self.attribute_dict["elevation"].get()),
                              self.encrypted_data["city"], get_value(), self.nonce["start"], self.nonce["finish"],
                              self.nonce["activity type"], self.nonce["city"]])
 
-
         conn.commit()
         cursor.close()
-
+        # delete entry text
         for item in entry_list:
             item.delete(0, "end")
+        # load main page
+        controller.show_frame(mainpage.MainPage)
 
-
-        controller.show_frame(main_page.Main_page)
-
+    def check_parameters(self):
+        """This function will check the insertion parameters and load the respective errors into the frame."""
+        try:
+            tuple_check_parameters = (self.attribute_dict["start"].get(), self.attribute_dict["finish"].get(),
+                                      float(self.attribute_dict["distance"].get()),
+                                      self.attribute_dict["activity type"].get(),
+                                      float(self.attribute_dict["duration"].get()),
+                                      float(self.attribute_dict["elevation"].get()), self.attribute_dict["city"].get(),
+                                      get_value())
+        except ValueError:
+            self.incorrect_labels[0].grid(row=8, column=3)
+            return False
+        for i in tuple_check_parameters:
+            if not str(i).strip():
+                self.incorrect_labels[1].grid(row=8, column=3)
+                return False
+        if tuple_check_parameters[2] < 0 or tuple_check_parameters[4] < 0:
+            self.incorrect_labels[2].grid(row=8, column=3)
+            return False
+        return True
 
     def show_main_menu(self, controller, entry_list):
+        """This funtions will delete the text of the entries and show the main page frame."""
         for item in entry_list:
             item.delete(0, "end")
 
-        controller.show_frame(main_page.Main_page)
+        controller.show_frame(mainpage.MainPage)
 
     def encrypt_data(self):
-        """"""
+        """This funtion will encrypt the data in order to be inserted in the table."""
+        # get global key
         key = get_encryption_key()
 
         # create the 4 nonce's for each encryption
         for item in self.nonce.keys():
             self.nonce[f"{item}"] = os.urandom(12)
 
-        # encrypt keys using parameters
+        # encrypt data
         chacha = ChaCha20Poly1305(key)
 
         for item in self.encrypted_data.keys():
-            encrypted_item = chacha.encrypt(self.nonce[f"{item}"], self.atribute_dict[f"{item}"].get().encode(), None)
+            encrypted_item = chacha.encrypt(self.nonce[f"{item}"], self.attribute_dict[f"{item}"].get().encode(), None)
             self.encrypted_data[f"{item}"] = encrypted_item
-
-
-
-
-

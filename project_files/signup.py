@@ -2,14 +2,15 @@ import re
 import sqlite3
 import os
 import customtkinter
-from main_page import Main_page
+from mainpage import MainPage
 from settings import set_value, get_encryption_key
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 import login
 
 
-class Sign_up(customtkinter.CTkFrame):
+class SignUp(customtkinter.CTkFrame):
+    """The sign-up frame for our app."""
 
     def __init__(self, parent, controller):
         # variables
@@ -52,7 +53,7 @@ class Sign_up(customtkinter.CTkFrame):
                                                               "The password should be at least 8 characters "
                                                               "long and should contain: a "
                                                               "number, a lowercase letter, "
-                                                              "an upercase letter and a special symbol "
+                                                              "an uppercase letter and a special symbol "
                                                               "! # $ % & * + - , . : ; ? @ ~")
         specifications_password.grid(row=6, column=1, columnspan=7)
 
@@ -114,7 +115,7 @@ class Sign_up(customtkinter.CTkFrame):
 
     def register_user(self, controller, incorrect_labels):
         """This function will register the user.
-        If the username exists it will display a red warining label."""
+        If the username exists it will display a red warning label."""
         # sql initialize
         cwd = os.getcwd()
         sqlite_file = cwd + r"/database_project"
@@ -139,9 +140,8 @@ class Sign_up(customtkinter.CTkFrame):
                 item.grid_remove()
             incorrect_labels[5].grid(row=11, column=4)
 
-
         else:
-
+            # derive and encrypt items
             self.derive_password()
             self.encrypt_data()
 
@@ -162,8 +162,8 @@ class Sign_up(customtkinter.CTkFrame):
             # remove text from entries
             for item in self.data.values():
                 item.delete(0, "end")
-
-            controller.show_frame(Main_page)
+            # show main page
+            controller.show_frame(MainPage)
 
     def derive_password(self):
         """This function will generate a salt and KDF to derive the user's password."""
@@ -185,10 +185,10 @@ class Sign_up(customtkinter.CTkFrame):
 
     def encrypt_data(self):
         """This function will generate a nonce for each encrypted item (3) and will encrypt said items"""
-
+        # get global key
         key = get_encryption_key()
 
-        # create the 3 nonce's for each encryption
+        # create the 2 nonce's for each encryption
         # email
         self.nonce["email"] = os.urandom(12)
         # phone
