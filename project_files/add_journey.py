@@ -2,21 +2,24 @@ import customtkinter
 import os
 import sqlite3
 import main_page
-from settings import get_value
+from settings import get_value, get_encryption_key
+from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 
 class Add_journey(customtkinter.CTkFrame):
     def __init__(self, parent, controller):
         customtkinter.CTkFrame.__init__(self, parent)
         self.atribute_dict = {"start": customtkinter.StringVar(), "finish": customtkinter.StringVar(),
-                              "distance": customtkinter.StringVar(), "travel method": customtkinter.StringVar(),
-                              "duration":customtkinter.StringVar(),
+                              "distance": customtkinter.StringVar(), "activity type": customtkinter.StringVar(),
+                              "duration": customtkinter.StringVar(),
                               "elevation": customtkinter.StringVar(), "city": customtkinter.StringVar()}
+        self.nonce = {"start": None, "finish": None, "activity type": None, "city": None}
+        self.encrypted_data = {"start": None, "finish": None, "activity type": None, "city": None}
         self.incorrect_labels = []
 
         # instructions
         instructions_1 = customtkinter.CTkLabel(self, text="To insert type the correct data type in each entry.")
         instructions_1.grid(row=1, column=2, columnspan=3)
-        instructions_2 = customtkinter.CTkLabel(self, text="START: text, FINISH: text, DISTANCE: number(kilometers), TRAVEL METHOD: text")
+        instructions_2 = customtkinter.CTkLabel(self, text="START: text, FINISH: text, DISTANCE: number(kilometers), ACTIVITY TYPE: text")
         instructions_2.grid(row=2, column=2, columnspan=3)
         instructions_3 = customtkinter.CTkLabel(self, text="DURATION: number (hours), ELEVATION: number (meters), CITY: TEXT")
         instructions_3.grid(row=3, column=2, columnspan=3)
@@ -80,14 +83,18 @@ class Add_journey(customtkinter.CTkFrame):
         # create table
         sql = ("""create table if not exists bike_routes
                 (
-                start         TEXT not null,
-                finish        TEXT not null,
+                start         BLOB not null,
+                finish        BLOB not null,
                 distance      REAL not null,
-                travel_method TEXT not null,
+                activity_type BLOB not null,
                 duration      REAL not null,
                 elevation     REAL not null,
-                city          TEXT not null,
-                username      TEXT 
+                city          BLOB not null,
+                username      TEXT not null,
+                nonce_start BLOB not null,
+                nonce_finish BLOB not null,
+                nonce_activity_type BLOB not null,
+                nonce_city BLOB not null 
                         constraint bike_routes_users_username_fk
                             references users
                 );""")
@@ -95,8 +102,8 @@ class Add_journey(customtkinter.CTkFrame):
 
         # insert into
         try:
-            tuple_insert = (self.atribute_dict["start"].get(), self.atribute_dict["finish"].get(),
-                        float(self.atribute_dict["distance"].get()), self.atribute_dict["travel method"].get(),
+            tuple_check_parameters = (self.atribute_dict["start"].get(), self.atribute_dict["finish"].get(),
+                        float(self.atribute_dict["distance"].get()), self.atribute_dict["activity type"].get(),
                         float(self.atribute_dict["duration"].get()),
                         float(self.atribute_dict["elevation"].get()), self.atribute_dict["city"].get(),
                         get_value())
@@ -104,20 +111,27 @@ class Add_journey(customtkinter.CTkFrame):
             self.incorrect_labels[0].grid(row=8, column=3)
             return None
 
-        for i in tuple_insert:
+        for i in tuple_check_parameters:
             if not str(i).strip():
                 self.incorrect_labels[1].grid(row=8, column=3)
                 return None
-        if tuple_insert[2] < 0 or tuple_insert[4] < 0:
+        if tuple_check_parameters[2] < 0 or tuple_check_parameters[4] < 0:
             self.incorrect_labels[2].grid(row=8, column=3)
             return None
 
+        self.encrypt_data()
+
         # insert into table
-        sql = ("""insert into  bike_routes(start, finish, distance, travel_method, duration, elevation, city, username)
-            values (?, ?, ?, ?, ?, ?, ?, ?)""")
+        sql = ("""insert into  bike_routes(start, finish, distance, activity_type, duration, elevation, 
+        city, username, nonce_start, nonce_finish, nonce_activity_type, nonce_city)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""")
 
 
-        cursor.execute(sql, tuple_insert)
+        cursor.execute(sql, [self.encrypted_data["start"], self.encrypted_data["finish"],
+                             float(self.atribute_dict["distance"].get()), self.encrypted_data["activity type"],
+                             float(self.atribute_dict["duration"].get()), float(self.atribute_dict["elevation"].get()),
+                             self.encrypted_data["city"], get_value(), self.nonce["start"], self.nonce["finish"],
+                             self.nonce["activity type"], self.nonce["city"]])
 
 
         conn.commit()
@@ -135,3 +149,23 @@ class Add_journey(customtkinter.CTkFrame):
             item.delete(0, "end")
 
         controller.show_frame(main_page.Main_page)
+
+    def encrypt_data(self):
+        """"""
+        key = get_encryption_key()
+
+        # create the 4 nonce's for each encryption
+        for item in self.nonce.keys():
+            self.nonce[f"{item}"] = os.urandom(12)
+
+        # encrypt keys using parameters
+        chacha = ChaCha20Poly1305(key)
+
+        for item in self.encrypted_data.keys():
+            encrypted_item = chacha.encrypt(self.nonce[f"{item}"], self.atribute_dict[f"{item}"].get().encode(), None)
+            self.encrypted_data[f"{item}"] = encrypted_item
+
+
+
+
+

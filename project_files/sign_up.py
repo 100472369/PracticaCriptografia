@@ -12,16 +12,13 @@ import login
 class Sign_up(customtkinter.CTkFrame):
 
     def __init__(self, parent, controller):
-        #variables
+        # variables
         self.data = {"username": None, "email": None, "phone": None, "password": None, "repeat_password": None}
         self.manipulated_data = {"password": None, "salt": None, "email": None, "phone": None}
         self.incorrect_labels = []
         self.nonce = {"email": None, "phone": None}
 
-
         customtkinter.CTkFrame.__init__(self, parent)
-
-
 
         # labels, entries and buttons
         label = customtkinter.CTkLabel(self, text="Sign Up")
@@ -40,7 +37,7 @@ class Sign_up(customtkinter.CTkFrame):
 
         email = customtkinter.CTkLabel(self, text="email:")
         email.grid(row=4, column=3)
-        email_entry=customtkinter.CTkEntry(self, placeholder_text="email")
+        email_entry = customtkinter.CTkEntry(self, placeholder_text="email")
         email_entry.grid(row=4, column=5)
         self.data["email"] = email_entry
 
@@ -49,7 +46,6 @@ class Sign_up(customtkinter.CTkFrame):
         phone_entry = customtkinter.CTkEntry(self, placeholder_text="phone")
         phone_entry.grid(row=5, column=5)
         self.data["phone"] = phone_entry
-
 
         specifications_password = customtkinter.CTkLabel(self,
                                                          text="                 "
@@ -66,7 +62,6 @@ class Sign_up(customtkinter.CTkFrame):
         entry_password.grid(row=7, column=5)
         self.data["password"] = entry_password
 
-
         repeat_password = customtkinter.CTkLabel(self, text="repeat password:")
         repeat_password.grid(row=8, column=3)
         repeat_password_entry = customtkinter.CTkEntry(self, placeholder_text="password", show="*")
@@ -80,19 +75,14 @@ class Sign_up(customtkinter.CTkFrame):
             format_label = customtkinter.CTkLabel(self, text=f"{item}", text_color="red")
             self.incorrect_labels.append(format_label)
 
-
         sign_up_button = customtkinter.CTkButton(self, text="Sign Up",
-                                                 command= lambda: self.check_parameters(controller,
-                                                                                        self.incorrect_labels))
+                                                 command=lambda: self.check_parameters(controller,
+                                                                                       self.incorrect_labels))
         sign_up_button.grid(row=9, column=4)
 
         return_menu = customtkinter.CTkButton(self, text="RETURN TO LOGIN PAGE",
                                               command=lambda: controller.show_frame(login.Login))
         return_menu.grid(row=10, column=4, pady=5)
-
-
-
-
 
     def check_parameters(self, controller, incorrect_labels):
         """This functions will check the parameters established.
@@ -121,6 +111,7 @@ class Sign_up(customtkinter.CTkFrame):
         else:
 
             self.register_user(controller, incorrect_labels)
+
     def register_user(self, controller, incorrect_labels):
         """This function will register the user.
         If the username exists it will display a red warining label."""
@@ -132,8 +123,9 @@ class Sign_up(customtkinter.CTkFrame):
         # create table
         sql = ("create table if not exists users "
                "(username TEXT not null constraint users_pk primary key, password BLOB not null,"
-               "email TEXT not null, phone_number TEXT not null,"
-               "salt BLOB not null);")
+               "email BlOB not null, phone_number BLOB not null,"
+               "salt BLOB not null, nonce_email BLOB not null,"
+               "nonce_phone_number BLOB not null);")
         cursor.execute(sql)
 
         # first check if username exists
@@ -153,7 +145,6 @@ class Sign_up(customtkinter.CTkFrame):
             self.derive_password()
             self.encrypt_data()
 
-
             # insert into table and log user
             sql = """INSERT INTO users (username, email, phone_number, password, salt, nonce_email, nonce_phone_number) 
             VALUES (?, ?, ?, ?, ?, ?, ?)"""
@@ -171,7 +162,6 @@ class Sign_up(customtkinter.CTkFrame):
             # remove text from entries
             for item in self.data.values():
                 item.delete(0, "end")
-
 
             controller.show_frame(Main_page)
 
@@ -198,7 +188,7 @@ class Sign_up(customtkinter.CTkFrame):
 
         key = get_encryption_key()
 
-        #create the 3 nonce's for each encrytption
+        # create the 3 nonce's for each encryption
         # email
         self.nonce["email"] = os.urandom(12)
         # phone
@@ -214,8 +204,3 @@ class Sign_up(customtkinter.CTkFrame):
             encrypted_item = chacha.encrypt(item, self.data[f"{keys[i]}"].get().encode(), None)
             self.manipulated_data[f"{keys[i]}"] = encrypted_item
             i += 1
-
-
-
-
-

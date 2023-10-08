@@ -31,7 +31,7 @@ class Main_page(customtkinter.CTkFrame):
         view_journeys.grid(pady=5)
 
         confirmation = customtkinter.CTkLabel(self, text="ARE YOU SURE?", text_color="RED")
-        yes_button = customtkinter.CTkButton(self, text="YES", command=lambda: self.delete_user(controller))
+        yes_button = customtkinter.CTkButton(self, text="YES", command=lambda: self.delete_user(controller, yes_button, no_button))
         no_button = customtkinter.CTkButton(self, text="NO", command= lambda:
         self.remove_confirmation(confirmation, yes_button, no_button))
 
@@ -50,7 +50,7 @@ class Main_page(customtkinter.CTkFrame):
         yes.grid_remove()
         no.grid_remove()
 
-    def delete_user(self, controller):
+    def delete_user(self, controller, yes, no):
         cwd = os.getcwd()
         sqlite_file = cwd + r"/database_project"
         conn = sqlite3.connect(sqlite_file)
@@ -69,6 +69,9 @@ class Main_page(customtkinter.CTkFrame):
 
         conn.commit()
         cursor.close()
+
+        yes.grid_remove()
+        no.grid_remove()
 
         controller.show_frame(login.Login)
 
