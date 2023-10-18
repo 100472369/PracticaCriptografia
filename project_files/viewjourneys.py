@@ -26,7 +26,7 @@ class ViewJourneys(customtkinter.CTkFrame):
         """This funtion will return all the user's trips."""
         # create cursor and connect to database
         cwd = os.getcwd()
-        sqlite_file = cwd + r"/database_project"
+        sqlite_file = cwd + r"/project_files/database_project.db"
         conn = sqlite3.connect(sqlite_file)
         cursor = conn.cursor()
         # for executing queries with foreign keys

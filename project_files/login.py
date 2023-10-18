@@ -54,7 +54,8 @@ class Login(customtkinter.CTkFrame):
 
         # initiate sql data
         cwd = os.getcwd()
-        sqlite_file = cwd + r"/database_project"
+        print(cwd)
+        sqlite_file = cwd + r"/project_files/database_project.db"
         conn = sqlite3.connect(sqlite_file)
         cursor = conn.cursor()
 

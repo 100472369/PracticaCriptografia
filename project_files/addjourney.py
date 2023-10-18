@@ -71,7 +71,7 @@ class AddJourney(customtkinter.CTkFrame):
             item.grid_remove()
 
         cwd = os.getcwd()
-        sqlite_file = cwd + r"/database_project"
+        sqlite_file = cwd + r"/project_files/database_project.db"
         conn = sqlite3.connect(sqlite_file)
         cursor = conn.cursor()
 

@@ -57,7 +57,7 @@ class MainPage(customtkinter.CTkFrame):
         """This function will delete aswell as their trips from the database.
         It will return the user to the login frame."""
         cwd = os.getcwd()
-        sqlite_file = cwd + r"/database_project"
+        sqlite_file = cwd + r"/project_files/database_project.db"
         conn = sqlite3.connect(sqlite_file)
         cursor = conn.cursor()
 

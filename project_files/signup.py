@@ -118,7 +118,7 @@ class SignUp(customtkinter.CTkFrame):
         If the username exists it will display a red warning label."""
         # sql initialize
         cwd = os.getcwd()
-        sqlite_file = cwd + r"/database_project"
+        sqlite_file = cwd + r"/project_files/database_project.db"
         conn = sqlite3.connect(sqlite_file)
         cursor = conn.cursor()
         # create table
