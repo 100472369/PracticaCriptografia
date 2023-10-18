@@ -15,7 +15,7 @@ class Tkinterapp(customtkinter.CTk):
         # give title to app
         self.title("Bycycle Land")
         # change geometry
-        self.geometry("1000x1000")
+        self.geometry("1000x800")
 
         # creating a container
         container = customtkinter.CTkFrame(self)

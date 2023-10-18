@@ -22,7 +22,7 @@ class SignUp(customtkinter.CTkFrame):
         customtkinter.CTkFrame.__init__(self, parent)
 
         # labels, entries and buttons
-        label = customtkinter.CTkLabel(self, text="Sign Up")
+        label = customtkinter.CTkLabel(self, text="Sign Up", font=("Impact", 20))
         label.grid(row=1, column=4)
 
         specifications_username = customtkinter.CTkLabel(self,
@@ -88,7 +88,7 @@ class SignUp(customtkinter.CTkFrame):
     def check_parameters(self, controller, incorrect_labels):
         """This functions will check the parameters established.
         If iot does it will call register_user, if not it will display a red warning label."""
-        regex_username = "^[a-zA-z0-9]{6,}$"
+        regex_username = "^[a-zA-Z0-9_-]{6,}$"
         regex_password = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!#$%&*+_,.:;?@~]).{8,}$"
         regex_email = "^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$"
         regex_phone = "^[0-9]{9}$"
@@ -201,6 +201,6 @@ class SignUp(customtkinter.CTkFrame):
 
         i = 0
         for item in self.nonce.values():
-            encrypted_item = chacha.encrypt(item, self.data[f"{keys[i]}"].get().encode(), None)
+            encrypted_item = chacha.encrypt(self.nonce[f"{item}"], self.data[f"{keys[i]}"].get().encode(), None)
             self.manipulated_data[f"{keys[i]}"] = encrypted_item
             i += 1

@@ -48,11 +48,11 @@ class AddJourney(customtkinter.CTkFrame):
         # extra buttons
         button = customtkinter.CTkButton(self, text="ADD JOURNEY",
                                          command=lambda: self.add_to_database(controller, entry_list))
-        button.grid(row=6, column=3)
+        button.grid(row=6, column=3, pady=5)
 
         return_button = customtkinter.CTkButton(self, text="RETURN TO MAIN MENU",
                                                 command=lambda: self.show_main_menu(controller, entry_list))
-        return_button.grid(row=7, column=3)
+        return_button.grid(row=7, column=3, pady=5)
 
         # for returning errors in insertion
         error_text = ["INCORRECT FORMAT OF DISTANCE OR DURATION OR ELEVATION",

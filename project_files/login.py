@@ -22,29 +22,30 @@ class Login(customtkinter.CTkFrame):
         self.grid_columnconfigure(4, weight=2)
 
         # labels, entries and buttons
-        label = customtkinter.CTkLabel(self, text="Login Page")
+
+        label = customtkinter.CTkLabel(self, text="Login Page", font=("Impact", 20))
         label.grid(row=1, column=2)
 
         label_username = customtkinter.CTkLabel(self, text="Username:")
-        label_username.grid(row=2, column=1)
+        label_username.grid(row=2, column=1, pady=5)
 
         entry_username = customtkinter.CTkEntry(self, placeholder_text="username")
-        entry_username.grid(row=2, column=2)
+        entry_username.grid(row=2, column=2, pady=5)
         self.data.append(entry_username)
 
         label_password = customtkinter.CTkLabel(self, text="Password: ")
-        label_password.grid(row=3, column=1)
+        label_password.grid(row=3, column=1,pady=2)
 
         entry_password = customtkinter.CTkEntry(self, placeholder_text="password", show="*")
-        entry_password.grid(row=3, column=2)
+        entry_password.grid(row=3, column=2, pady=2)
         self.data.append(entry_password)
 
         login_button = customtkinter.CTkButton(self, text="Login", command=lambda: self.log_user
             (controller, incorrect_data))
-        login_button.grid(row=4, column=2)
+        login_button.grid(row=4, column=2, pady=2)
 
         sign_up_button = customtkinter.CTkButton(self, text="Sign up", command=lambda: controller.show_frame(SignUp))
-        sign_up_button.grid(row=5, column=2)
+        sign_up_button.grid(row=5, column=2, pady=2)
 
         incorrect_data = customtkinter.CTkLabel(self, text="INCORRECT USERNAME OR PASSWORD", text_color="red")
 
@@ -85,7 +86,6 @@ class Login(customtkinter.CTkFrame):
             label.grid(row=6, column=2)
 
         else:
-
             # close cursor set the username value and show main page.
             cursor.close()
             set_value(self.data[0].get())

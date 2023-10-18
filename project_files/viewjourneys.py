@@ -38,23 +38,25 @@ class ViewJourneys(customtkinter.CTkFrame):
         cursor.execute(sql, [get_value()])
         self.return_query = cursor.fetchall()
         #  create headers (entries) for each of the attributes
-        attribute_names = ["start", "finish", "distance(kilometers)", "activity type", "duration(hours)",
-                           "elevation(meters)", "city"]
+        attribute_names = ["Start", "Finish", "Distance (kilometers)", "Activity type", "Duration (hours)",
+                           "Elevation(meters)", "City"]
         string_var_items = []
         for item in attribute_names:
             string_var_items.append(customtkinter.StringVar(self, f"{item}"))
 
         for i in range(len(attribute_names)):
-            entry = customtkinter.CTkEntry(self, textvariable=string_var_items[i], state="readonly")
-            entry.grid(row=3, column=i)
+            entry = customtkinter.CTkLabel(self, text=f"{attribute_names[i]}", font=("Arial", 15))
+            entry.place(relx=0.5, rely=0.5)
+            entry.grid(row=3, column=i, sticky='nsew', padx=10)
         # display the decrypted data
         if len(self.return_query) > 0:
             self.decrypt_data()
             i = 4
             for item in self.decrypted_data:
                 for j in range(len(item)):
-                    label = customtkinter.CTkLabel(self, text=f"{item[j]}")
-                    label.grid(row=i, column=j)
+                    label = customtkinter.CTkLabel(self, text=f"{item[j]}", font=("Arial", 12))
+                    label.place(relx=0.5, rely=0.5)
+                    label.grid(row=i, column=j, sticky='nsew', padx=5, )
                 i += 1
 
     # noinspection SpellCheckingInspection
