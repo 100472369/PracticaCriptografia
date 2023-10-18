@@ -3,7 +3,7 @@ import sqlite3
 import os
 import customtkinter
 from mainpage import MainPage
-from settings import set_value, get_encryption_key
+from settings import set_value, set_encryption_key
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 import login
@@ -15,7 +15,7 @@ class SignUp(customtkinter.CTkFrame):
     def __init__(self, parent, controller):
         # variables
         self.data = {"username": None, "email": None, "phone": None, "password": None, "repeat_password": None}
-        self.manipulated_data = {"password": None, "salt": None, "email": None, "phone": None}
+        self.manipulated_data = {"password": None, "salt_password": None, "email": None, "phone": None, "salt_key": None}
         self.incorrect_labels = []
         self.nonce = {"email": None, "phone": None}
 
@@ -146,13 +146,14 @@ class SignUp(customtkinter.CTkFrame):
             self.encrypt_data()
 
             # insert into table and log user
-            sql = """INSERT INTO users (username, email, phone_number, password, salt, nonce_email, nonce_phone_number) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)"""
+            sql = """INSERT INTO users (username, email, phone_number, password, salt_password, nonce_email, nonce_phone_number, salt_key) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
 
             cursor.execute(sql,
                            [self.data["username"].get(), self.manipulated_data["email"],
                             self.manipulated_data["phone"], self.manipulated_data["password"],
-                            self.manipulated_data["salt"], self.nonce["email"], self.nonce["phone"]])
+                            self.manipulated_data["salt_password"], self.nonce["email"], self.nonce["phone"],
+                            self.manipulated_data["salt_key"]])
 
             conn.commit()
             cursor.close()
@@ -169,6 +170,13 @@ class SignUp(customtkinter.CTkFrame):
         """This function will generate a salt and KDF to derive the user's password."""
         salt = os.urandom(32)
 
+        derived_password = self.run_scrypt(salt)
+        self.manipulated_data["password"] = derived_password
+        self.manipulated_data["salt_password"] = salt
+
+        return None
+
+    def run_scrypt(self, salt):
         kdf = Scrypt(
             salt=salt,
             length=32,
@@ -177,16 +185,16 @@ class SignUp(customtkinter.CTkFrame):
             p=1,
         )
         # encrypt password
-        derived_password = kdf.derive(self.data["password"].get().encode())
-        self.manipulated_data["password"] = derived_password
-        self.manipulated_data["salt"] = salt
 
-        return None
+        return kdf.derive(self.data["password"].get().encode())
 
     def encrypt_data(self):
         """This function will generate a nonce for each encrypted item (3) and will encrypt said items"""
         # get global key
-        key = get_encryption_key()
+        salt = os.urandom(32)
+        key = self.run_scrypt(salt)
+        # insert salt into manipulated data
+        self.manipulated_data["salt_key"] = salt
 
         # create the 2 nonce's for each encryption
         # email
@@ -204,3 +212,7 @@ class SignUp(customtkinter.CTkFrame):
             encrypted_item = chacha.encrypt(self.nonce[f"{item}"], self.data[f"{keys[i]}"].get().encode(), None)
             self.manipulated_data[f"{keys[i]}"] = encrypted_item
             i += 1
+
+        # store key as temporary global variable
+        set_encryption_key(key)
+

@@ -5,7 +5,7 @@ import cryptography.exceptions
 import customtkinter
 from signup import SignUp
 from mainpage import MainPage
-from settings import set_value
+from settings import set_value, set_encryption_key
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
 
@@ -49,19 +49,22 @@ class Login(customtkinter.CTkFrame):
 
         incorrect_data = customtkinter.CTkLabel(self, text="INCORRECT USERNAME OR PASSWORD", text_color="red")
 
+
+
     def log_user(self, controller, label):
         """this function will try to log the user and redirect to the main page.
         If not possible it wil display a red label error."""
 
+
+
         # initiate sql data
         cwd = os.getcwd()
-        print(cwd)
         sqlite_file = cwd + r"/project_files/database_project.db"
         conn = sqlite3.connect(sqlite_file)
         cursor = conn.cursor()
 
         # execute query
-        sql = "select username, password, salt FROM users where username=?"
+        sql = "select username, password, salt_password, salt_key FROM users where username=?"
         cursor.execute(sql, [self.data[0].get()])
 
         # user verification with sql data
@@ -92,5 +95,18 @@ class Login(customtkinter.CTkFrame):
             # remove text from entries
             for item in self.data:
                 item.delete(0, "end")
+            # create key for accessing data
+            salt = database_tuple[0][3]
+            kdf = Scrypt(
+                salt=salt,
+                length=32,
+                n=2 ** 14,
+                r=8,
+                p=1,
+            )
+            # store key as temporary global variable
+
+            key = kdf.derive(self.data[1].get().encode())
+            set_encryption_key(key)
             # show main page
             controller.show_frame(MainPage)

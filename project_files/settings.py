@@ -1,14 +1,17 @@
 # here we define the global variables we are going to use
 
-#######################################################################################################################
-"""this will be the  key used to encrypt our data"""
-encryption_key =b'k\xd0\xea\xce\xf6\x14\xfcOH\xa7\x9a\x8c\xb2F\xca\x163K\x11\x8a\xa75\x88,.\x82P\xd6\x0e\xb4\x7fK'
+
+"""this will be the  key used to encrypt our data it will be different for
+each user and will only be used when running the program."""
+encryption_key = b''
 
 def get_encryption_key():
     return encryption_key
+def set_encryption_key(new_value):
+    global encryption_key
+    encryption_key = new_value
 
 
-#######################################################################################################################
 
 # variable used to access foreign key data
 username_global = ""
