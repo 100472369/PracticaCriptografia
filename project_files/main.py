@@ -50,6 +50,11 @@ class Tkinterapp(customtkinter.CTk):
 
     def write_log(self, messages: list):
         cwd = os.getcwd()
+        # create folder if not exists
+        directory = cwd + "/log_files"
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         username = get_value()
         file_name = cwd + f"/log_files/{username}.log"
 
