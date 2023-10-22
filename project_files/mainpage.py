@@ -55,8 +55,8 @@ class MainPage(customtkinter.CTkFrame):
         no.grid_remove()
 
     def delete_user(self, controller, yes, no, confirmation):
-        """This function will delete aswell as their trips from the database.
-        It will return the user to the login frame."""
+        """This function will delete the user as well as their trips from the database.
+        It will then return the user to the login frame."""
         cwd = os.getcwd()
         sqlite_file = cwd + r"/project_files/database_project.db"
         conn = sqlite3.connect(sqlite_file)

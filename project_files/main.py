@@ -44,11 +44,12 @@ class Tkinterapp(customtkinter.CTk):
         self.show_frame(Login)
 
     def show_frame(self, cont):
-        """Used to display the frame passed as parameter"""
+        """Used to display the frame passed as parameter."""
         frame = self.frames[cont]
         frame.tkraise()
 
     def write_log(self, messages: list):
+        """This function will write log details into a file when encryption, verification or decryption occurs."""
         cwd = os.getcwd()
         # create folder if not exists
         directory = cwd + "/log_files"

@@ -23,7 +23,7 @@ class ViewJourneys(customtkinter.CTkFrame):
         return_menu.grid(row=2, column=3, pady=5)
 
     def run_query(self, controller):
-        """This funtion will return all the user's trips."""
+        """This funtion will display all the user's trips."""
         # create cursor and connect to database
         cwd = os.getcwd()
         sqlite_file = cwd + r"/project_files/database_project.db"
@@ -65,7 +65,7 @@ class ViewJourneys(customtkinter.CTkFrame):
         """This funtion will decrypt the query data."""
         # initialize the list as empy so there are no repeated rows when the button is clicked multiple times
         self.decrypted_data = []
-        # create chacha with global key
+        # create ChaCha with global key
         key = get_encryption_key()
         chacha = ChaCha20Poly1305(key)
 
@@ -87,7 +87,7 @@ class ViewJourneys(customtkinter.CTkFrame):
             # add them to a list
             for i in decrypted_items.values():
                 decrypted_items_list.append(i)
-            # add the decrytped items list to the main list
+            # add the decrypted items list to the main list
             self.decrypted_data.append(decrypted_items_list)
 
     def get_nonces(self, tuple_item):

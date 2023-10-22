@@ -86,8 +86,8 @@ class SignUp(customtkinter.CTkFrame):
         return_menu.grid(row=10, column=4, pady=5)
 
     def check_parameters(self, controller, incorrect_labels):
-        """This functions will check the parameters established.
-        If iot does it will call register_user, if not it will display a red warning label."""
+        """This functions will check the data using the parameters established.
+        If the data is correct it will call register_user, if not it will display a red warning label."""
         regex_username = r"^[a-zA-Z0-9_-]{6,}$"
         regex_password = r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!#$%&*+_,.:;?@~]).{8,}$"
         regex_email = r"^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$"
@@ -115,7 +115,7 @@ class SignUp(customtkinter.CTkFrame):
 
     def register_user(self, controller, incorrect_labels):
         """This function will register the user.
-        If the username exists it will display a red warning label."""
+        If the username already exists it will display a red warning label."""
         # sql initialize
         cwd = os.getcwd()
         sqlite_file = cwd + r"/project_files/database_project.db"
@@ -185,6 +185,7 @@ class SignUp(customtkinter.CTkFrame):
         return None
 
     def run_scrypt(self, salt):
+        """This function will derive the password using the Scrypt function."""
         kdf = Scrypt(
             salt=salt,
             length=32,
@@ -197,7 +198,7 @@ class SignUp(customtkinter.CTkFrame):
         return kdf.derive(self.data["password"].get().encode())
 
     def encrypt_data(self):
-        """This function will generate a nonce for each encrypted item (3) and will encrypt said items"""
+        """This function will generate a nonce for each encrypted item (3) and then encrypt said items."""
         # get global key
         salt = os.urandom(32)
         key = self.run_scrypt(salt)

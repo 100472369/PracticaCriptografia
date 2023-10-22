@@ -64,7 +64,7 @@ class AddJourney(customtkinter.CTkFrame):
 
     def add_to_database(self, controller, entry_list):
         """This function will insert the data into the database and return the user to the main page.
-        If it gets and error while inserting then it will display a red warning label."""
+        If the data is not in the correct format, then it will display a red warning label."""
 
         # delete previous incorrect labels
         for item in self.incorrect_labels:
@@ -152,14 +152,14 @@ class AddJourney(customtkinter.CTkFrame):
         return True
 
     def show_main_menu(self, controller, entry_list):
-        """This functions will delete the text of the entries and show the main page frame."""
+        """This function will delete the text of the entries and show the main page frame."""
         for item in entry_list:
             item.delete(0, "end")
 
         controller.show_frame(mainpage.MainPage)
 
     def encrypt_data(self):
-        """This funtion will encrypt the data in order to be inserted in the table."""
+        """This funtion will encrypt the data."""
         # get global key
         key = get_encryption_key()
 
