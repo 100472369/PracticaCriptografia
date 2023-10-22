@@ -15,14 +15,14 @@ class ViewJourneys(customtkinter.CTkFrame):
         self.decrypted_data = []
         customtkinter.CTkFrame.__init__(self, parent)
         # buttons
-        button = customtkinter.CTkButton(self, text="SHOW JOURNEYS", command=lambda: self.run_query())
+        button = customtkinter.CTkButton(self, text="SHOW JOURNEYS", command=lambda: self.run_query(controller))
         button.grid(row=1, column=3, pady=5)
 
         return_menu = customtkinter.CTkButton(self, text="RETURN TO MAIN MENU",
                                               command=lambda: controller.show_frame(mainpage.MainPage))
         return_menu.grid(row=2, column=3, pady=5)
 
-    def run_query(self):
+    def run_query(self, controller):
         """This funtion will return all the user's trips."""
         # create cursor and connect to database
         cwd = os.getcwd()
@@ -40,9 +40,6 @@ class ViewJourneys(customtkinter.CTkFrame):
         #  create headers (entries) for each of the attributes
         attribute_names = ["Start", "Finish", "Distance (kilometers)", "Activity type", "Duration (hours)",
                            "Elevation(meters)", "City"]
-        string_var_items = []
-        for item in attribute_names:
-            string_var_items.append(customtkinter.StringVar(self, f"{item}"))
 
         for i in range(len(attribute_names)):
             entry = customtkinter.CTkLabel(self, text=f"{attribute_names[i]}", font=("Arial", 15))
@@ -56,10 +53,14 @@ class ViewJourneys(customtkinter.CTkFrame):
                 for j in range(len(item)):
                     label = customtkinter.CTkLabel(self, text=f"{item[j]}", font=("Arial", 12))
                     label.place(relx=0.5, rely=0.5)
-                    label.grid(row=i, column=j, sticky='nsew', padx=5, )
+                    label.grid(row=i, column=j, sticky='nsew', padx=5)
                 i += 1
 
-    # noinspection SpellCheckingInspection
+            #  write message in log
+            messages = [f"View journey information for user: {get_value()}",
+                        "Successfully decrypted journey data.", "Algorithm used: ChaCha. Length of key: 32\n"]
+            controller.write_log(messages)
+
     def decrypt_data(self):
         """This funtion will decrypt the query data."""
         # initialize the list as empy so there are no repeated rows when the button is clicked multiple times

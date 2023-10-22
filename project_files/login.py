@@ -5,7 +5,7 @@ import cryptography.exceptions
 import customtkinter
 from signup import SignUp
 from mainpage import MainPage
-from settings import set_value, set_encryption_key
+from settings import set_value, set_encryption_key, get_value
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
 
@@ -34,7 +34,7 @@ class Login(customtkinter.CTkFrame):
         self.data.append(entry_username)
 
         label_password = customtkinter.CTkLabel(self, text="Password: ")
-        label_password.grid(row=3, column=1,pady=2)
+        label_password.grid(row=3, column=1, pady=2)
 
         entry_password = customtkinter.CTkEntry(self, placeholder_text="password", show="*")
         entry_password.grid(row=3, column=2, pady=2)
@@ -49,13 +49,9 @@ class Login(customtkinter.CTkFrame):
 
         incorrect_data = customtkinter.CTkLabel(self, text="INCORRECT USERNAME OR PASSWORD", text_color="red")
 
-
-
     def log_user(self, controller, label):
         """this function will try to log the user and redirect to the main page.
         If not possible it wil display a red label error."""
-
-
 
         # initiate sql data
         cwd = os.getcwd()
@@ -104,9 +100,16 @@ class Login(customtkinter.CTkFrame):
                 r=8,
                 p=1,
             )
-            # store key as temporary global variable
 
+            # store key as temporary global variable
             key = kdf.derive(self.data[1].get().encode())
             set_encryption_key(key)
+
+            #  write message in log
+
+            messages = [f"Login information for user: {get_value()}",
+                        "Successfully verified user data.", "Algorithm used: Scrypt. Length of key: 32\n"]
+            controller.write_log(messages)
+
             # show main page
             controller.show_frame(MainPage)

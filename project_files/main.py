@@ -4,6 +4,9 @@ from signup import SignUp
 from mainpage import MainPage
 from addjourney import AddJourney
 from viewjourneys import ViewJourneys
+import logging
+import os
+from settings import get_value
 
 
 class Tkinterapp(customtkinter.CTk):
@@ -15,7 +18,7 @@ class Tkinterapp(customtkinter.CTk):
         # give title to app
         self.title("Bycycle Land")
         # change geometry
-        self.geometry("1000x800")
+        self.geometry("1300x800")
 
         # creating a container
         container = customtkinter.CTkFrame(self)
@@ -44,6 +47,16 @@ class Tkinterapp(customtkinter.CTk):
         """Used to display the frame passed as parameter"""
         frame = self.frames[cont]
         frame.tkraise()
+
+    def write_log(self, messages: list):
+        cwd = os.getcwd()
+        username = get_value()
+        file_name = cwd + f"/log_files/{username}.log"
+
+        logging.basicConfig(filename=f"{file_name}", level=logging.INFO)
+        logging.info(f"{messages[0]}")
+        logging.info(f"{messages[1]}")
+        logging.info(f"{messages[2]}")
 
 
 app = Tkinterapp()

@@ -3,7 +3,7 @@ import sqlite3
 import os
 import customtkinter
 from mainpage import MainPage
-from settings import set_value, set_encryption_key
+from settings import set_value, set_encryption_key, get_value
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 import login
@@ -15,9 +15,9 @@ class SignUp(customtkinter.CTkFrame):
     def __init__(self, parent, controller):
         # variables
         self.data = {"username": None, "email": None, "phone": None, "password": None, "repeat_password": None}
-        self.manipulated_data = {"password": None, "salt_password": None, "email": None, "phone": None, "salt_key": None}
+        self.manipulated_data = {"password": b"", "salt_password": b"", "email": b"", "phone": b"", "salt_key": b""}
         self.incorrect_labels = []
-        self.nonce = {"email": None, "phone": None}
+        self.nonce = {"email": b"", "phone": b""}
 
         customtkinter.CTkFrame.__init__(self, parent)
 
@@ -88,10 +88,10 @@ class SignUp(customtkinter.CTkFrame):
     def check_parameters(self, controller, incorrect_labels):
         """This functions will check the parameters established.
         If iot does it will call register_user, if not it will display a red warning label."""
-        regex_username = "^[a-zA-Z0-9_-]{6,}$"
-        regex_password = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!#$%&*+_,.:;?@~]).{8,}$"
-        regex_email = "^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$"
-        regex_phone = "^[0-9]{9}$"
+        regex_username = r"^[a-zA-Z0-9_-]{6,}$"
+        regex_password = r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!#$%&*+_,.:;?@~]).{8,}$"
+        regex_email = r"^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$"
+        regex_phone = r"^[0-9]{9}$"
 
         for item in self.incorrect_labels:
             item.grid_remove()
@@ -146,7 +146,8 @@ class SignUp(customtkinter.CTkFrame):
             self.encrypt_data()
 
             # insert into table and log user
-            sql = """INSERT INTO users (username, email, phone_number, password, salt_password, nonce_email, nonce_phone_number, salt_key) 
+            sql = """INSERT INTO users (username, email, phone_number, 
+            password, salt_password, nonce_email, nonce_phone_number, salt_key) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
 
             cursor.execute(sql,
@@ -159,6 +160,13 @@ class SignUp(customtkinter.CTkFrame):
             cursor.close()
 
             set_value(self.data["username"].get())
+
+            # write message in log
+            #  write message in log
+            messages = [f"Signup information for user: {get_value()}",
+                        "Successfully encrypted and derived user data.",
+                        "Algorithms used: ChaCha20, Scrypt. Length of key: 32\n"]
+            controller.write_log(messages)
 
             # remove text from entries
             for item in self.data.values():
@@ -202,17 +210,12 @@ class SignUp(customtkinter.CTkFrame):
         # phone
         self.nonce["phone"] = os.urandom(12)
 
-        # initialize chacha
+        # initialize ChaCha
         chacha = ChaCha20Poly1305(key)
 
-        keys = list(self.nonce.keys())
-
-        i = 0
-        for item in self.nonce.values():
-            encrypted_item = chacha.encrypt(self.nonce[f"{item}"], self.data[f"{keys[i]}"].get().encode(), None)
-            self.manipulated_data[f"{keys[i]}"] = encrypted_item
-            i += 1
+        for item in self.nonce.keys():
+            encrypted_item = chacha.encrypt(self.nonce[f"{item}"], self.data[f"{item}"].get().encode(), None)
+            self.manipulated_data[f"{item}"] = encrypted_item
 
         # store key as temporary global variable
         set_encryption_key(key)
-

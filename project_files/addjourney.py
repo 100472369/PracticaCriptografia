@@ -40,7 +40,7 @@ class AddJourney(customtkinter.CTkFrame):
         for item in list_values:
             label = customtkinter.CTkLabel(self, text=f"{item}")
             label.grid(row=4, column=j)
-            entry = customtkinter.CTkEntry(self, placeholder_text="atribute",
+            entry = customtkinter.CTkEntry(self, placeholder_text="attribute",
                                            textvariable=self.attribute_dict[f"{item}"])
             entry.grid(row=5, column=j)
             entry_list.append(entry)
@@ -101,7 +101,7 @@ class AddJourney(customtkinter.CTkFrame):
         if self.check_parameters() is False:
             return None
 
-        # encypt the data before inserting to table
+        # encrypt the data before inserting to table
         self.encrypt_data()
 
         # insert into table
@@ -121,6 +121,12 @@ class AddJourney(customtkinter.CTkFrame):
         # delete entry text
         for item in entry_list:
             item.delete(0, "end")
+
+        #  write message in log
+        messages = [f"Add journey information for user: {get_value()}",
+                    "Successfully encrypted journey data.", "Algorithm used: ChaCha. Length of key: 32\n"]
+        controller.write_log(messages)
+
         # load main page
         controller.show_frame(mainpage.MainPage)
 
@@ -146,7 +152,7 @@ class AddJourney(customtkinter.CTkFrame):
         return True
 
     def show_main_menu(self, controller, entry_list):
-        """This funtions will delete the text of the entries and show the main page frame."""
+        """This functions will delete the text of the entries and show the main page frame."""
         for item in entry_list:
             item.delete(0, "end")
 

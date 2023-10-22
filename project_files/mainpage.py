@@ -33,7 +33,8 @@ class MainPage(customtkinter.CTkFrame):
 
         confirmation = customtkinter.CTkLabel(self, text="ARE YOU SURE?", text_color="RED")
         yes_button = customtkinter.CTkButton(self, text="YES",
-                                             command=lambda: self.delete_user(controller, yes_button, no_button))
+                                             command=lambda: self.delete_user(controller, yes_button,
+                                                                              no_button, confirmation))
         no_button = customtkinter.CTkButton(self, text="NO", command=lambda:
             self.remove_confirmation(confirmation, yes_button, no_button))
 
@@ -53,7 +54,7 @@ class MainPage(customtkinter.CTkFrame):
         yes.grid_remove()
         no.grid_remove()
 
-    def delete_user(self, controller, yes, no):
+    def delete_user(self, controller, yes, no, confirmation):
         """This function will delete aswell as their trips from the database.
         It will return the user to the login frame."""
         cwd = os.getcwd()
@@ -72,7 +73,6 @@ class MainPage(customtkinter.CTkFrame):
         conn.commit()
         cursor.close()
         # remove confirmation buttons
-        yes.grid_remove()
-        no.grid_remove()
+        self.remove_confirmation(confirmation, yes, no)
         # load login frame
         controller.show_frame(login.Login)
