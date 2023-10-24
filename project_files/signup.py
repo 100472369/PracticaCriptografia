@@ -79,9 +79,9 @@ class SignUp(customtkinter.CTkFrame):
                         fg_color="#91D53E", hover_color="#689F33", border_color="#3E4B3C", height=30, border_width=1)
         sign_up_button.grid(row=9, column=3)
 
-        return_menu = customtkinter.CTkButton(self, text="RETURN TO LOGIN PAGE", text_color="#3E4B3C",
+        return_menu = customtkinter.CTkButton(self, text="RETURN TO LOGIN PAGE", text_color="WHITE",
                         command=lambda: controller.show_frame(login.Login),
-                        fg_color="#91D53E", hover_color="#689F33", border_color="#3E4B3C", height=30, border_width=1)
+                        fg_color="#91D53E", hover_color="#689F33", border_color="WHITE", height=30, border_width=1)
         return_menu.grid(row=10, column=3, pady=5)
 
     def check_parameters(self, controller, incorrect_labels):
