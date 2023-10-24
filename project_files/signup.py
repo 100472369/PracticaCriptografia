@@ -22,51 +22,49 @@ class SignUp(customtkinter.CTkFrame):
         customtkinter.CTkFrame.__init__(self, parent)
 
         # labels, entries and buttons
-        label = customtkinter.CTkLabel(self, text="Sign Up", font=("Impact", 20))
-        label.grid(row=1, column=4)
+        label = customtkinter.CTkLabel(self, text="Sign Up", font=("Impact", 25))
+        label.grid(row=1, column=3, pady=(100, 5))
 
-        specifications_username = customtkinter.CTkLabel(self,
-                                                         text="The username should be at least 6 characters "
-                                                              "long and should only contain "
-                                                              "numbers, letters, hyphens and underscores.")
-        specifications_username.grid(row=2, column=1, columnspan=7)
-        username = customtkinter.CTkLabel(self, text="username:")
-        username.grid(row=3, column=3)
-        entry_username = customtkinter.CTkEntry(self, placeholder_text="username")
-        entry_username.grid(row=3, column=5)
+        specifications_username = customtkinter.CTkLabel(self, text="The username should be at least 6 characters "
+                                                              "long and should only contain"
+                                                              "numbers, letters, hyphens and underscores.", font=("Arial", 15, 'bold'))
+        specifications_username.grid(row=2, column=1, columnspan=5, pady=4, padx=(95, 100))
+        username = customtkinter.CTkLabel(self, text="Username:", font=("Trebuchet MS", 16))
+        username.grid(row=3, column=2, pady=2)
+        entry_username = customtkinter.CTkEntry(self, placeholder_text="username", font=("Trebuchet MS", 15))
+        entry_username.grid(row=3, column=4, pady=2)
         self.data["username"] = entry_username
 
-        email = customtkinter.CTkLabel(self, text="email:")
-        email.grid(row=4, column=3)
-        email_entry = customtkinter.CTkEntry(self, placeholder_text="email")
-        email_entry.grid(row=4, column=5)
+        email = customtkinter.CTkLabel(self, text="Email:", font=("Trebuchet MS", 16))
+        email.grid(row=4, column=2, pady=2)
+        email_entry = customtkinter.CTkEntry(self, placeholder_text="email", font=("Trebuchet MS", 15))
+        email_entry.grid(row=4, column=4, pady=2)
         self.data["email"] = email_entry
 
-        phone = customtkinter.CTkLabel(self, text="phone number:")
-        phone.grid(row=5, column=3)
-        phone_entry = customtkinter.CTkEntry(self, placeholder_text="phone")
-        phone_entry.grid(row=5, column=5)
+        phone = customtkinter.CTkLabel(self, text="Phone Number:", font=("Trebuchet MS", 16))
+        phone.grid(row=5, column=2, pady=2)
+        phone_entry = customtkinter.CTkEntry(self, placeholder_text="phone", font=("Trebuchet MS", 15))
+        phone_entry.grid(row=5, column=4, pady=2)
         self.data["phone"] = phone_entry
 
-        specifications_password = customtkinter.CTkLabel(self,
-                                                         text="                 "
+        specifications_password = customtkinter.CTkLabel(self,text=
                                                               "The password should be at least 8 characters "
-                                                              "long and should contain: a "
-                                                              "number, a lowercase letter, "
+                                                              "long and should contain:\n a "
+                                                              "number, a lowercase letter,"
                                                               "an uppercase letter and a special symbol "
-                                                              "! # $ % & * + - , . : ; ? @ ~")
-        specifications_password.grid(row=6, column=1, columnspan=7)
+                                                              "! # $ % & * + - , . : ; ? @ ~", font=("Arial", 15, 'bold'))
+        specifications_password.grid(row=6, column=1, columnspan=5, pady=(20, 4))
 
-        password = customtkinter.CTkLabel(self, text="password:")
-        password.grid(row=7, column=3)
-        entry_password = customtkinter.CTkEntry(self, placeholder_text="password", show="*")
-        entry_password.grid(row=7, column=5)
+        password = customtkinter.CTkLabel(self, text="Password:", font=("Trebuchet MS", 16))
+        password.grid(row=7, column=2, pady=2)
+        entry_password = customtkinter.CTkEntry(self, placeholder_text="password", show="*", font=("Trebuchet MS", 15))
+        entry_password.grid(row=7, column=4)
         self.data["password"] = entry_password
 
-        repeat_password = customtkinter.CTkLabel(self, text="repeat password:")
-        repeat_password.grid(row=8, column=3)
-        repeat_password_entry = customtkinter.CTkEntry(self, placeholder_text="password", show="*")
-        repeat_password_entry.grid(row=8, column=5)
+        repeat_password = customtkinter.CTkLabel(self, text="Repeat password:", font=("Trebuchet MS", 16))
+        repeat_password.grid(row=8, column=2, pady=2)
+        repeat_password_entry = customtkinter.CTkEntry(self, placeholder_text="password", show="*", font=("Trebuchet MS", 15))
+        repeat_password_entry.grid(row=8, column=4, pady=2)
         self.data["repeat_password"] = repeat_password_entry
 
         # format errors
@@ -76,14 +74,15 @@ class SignUp(customtkinter.CTkFrame):
             format_label = customtkinter.CTkLabel(self, text=f"{item}", text_color="red")
             self.incorrect_labels.append(format_label)
 
-        sign_up_button = customtkinter.CTkButton(self, text="Sign Up",
-                                                 command=lambda: self.check_parameters(controller,
-                                                                                       self.incorrect_labels))
-        sign_up_button.grid(row=9, column=4)
+        sign_up_button = customtkinter.CTkButton(self, text="Sign Up", text_color="#3E4B3C",
+                        command=lambda: self.check_parameters(controller, self.incorrect_labels),
+                        fg_color="#91D53E", hover_color="#689F33", border_color="#3E4B3C", height=30, border_width=1)
+        sign_up_button.grid(row=9, column=3)
 
-        return_menu = customtkinter.CTkButton(self, text="RETURN TO LOGIN PAGE",
-                                              command=lambda: controller.show_frame(login.Login))
-        return_menu.grid(row=10, column=4, pady=5)
+        return_menu = customtkinter.CTkButton(self, text="RETURN TO LOGIN PAGE", text_color="#3E4B3C",
+                        command=lambda: controller.show_frame(login.Login),
+                        fg_color="#91D53E", hover_color="#689F33", border_color="#3E4B3C", height=30, border_width=1)
+        return_menu.grid(row=10, column=3, pady=5)
 
     def check_parameters(self, controller, incorrect_labels):
         """This functions will check the data using the parameters established.
@@ -97,18 +96,18 @@ class SignUp(customtkinter.CTkFrame):
             item.grid_remove()
 
         if re.fullmatch(regex_username, self.data["username"].get()) is None:
-            incorrect_labels[0].grid(row=11, column=4)
+            incorrect_labels[0].grid(row=11, column=3)
 
         elif re.fullmatch(regex_email, self.data["email"].get()) is None:
-            incorrect_labels[1].grid(row=11, column=4)
+            incorrect_labels[1].grid(row=11, column=3)
 
         elif re.fullmatch(regex_phone, self.data["phone"].get()) is None:
-            incorrect_labels[2].grid(row=11, column=4)
+            incorrect_labels[2].grid(row=11, column=3)
 
         elif re.fullmatch(regex_password, self.data["password"].get()) is None:
-            incorrect_labels[3].grid(row=11, column=4)
+            incorrect_labels[3].grid(row=11, column=3)
         elif self.data["password"].get() != self.data["repeat_password"].get():
-            incorrect_labels[4].grid(row=11, column=4)
+            incorrect_labels[4].grid(row=11, column=3)
         else:
 
             self.register_user(controller, incorrect_labels)

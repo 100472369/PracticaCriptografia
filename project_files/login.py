@@ -23,28 +23,29 @@ class Login(customtkinter.CTkFrame):
 
         # labels, entries and buttons
 
-        label = customtkinter.CTkLabel(self, text="Login Page", font=("Impact", 20))
-        label.grid(row=1, column=2)
+        label = customtkinter.CTkLabel(self, text="Login Page", font=("Impact", 25))
+        label.grid(row=1, column=2, pady=(155, 5))
 
-        label_username = customtkinter.CTkLabel(self, text="Username:")
+        label_username = customtkinter.CTkLabel(self, text="Username:", font=("Trebuchet MS", 15))
         label_username.grid(row=2, column=1, pady=5)
 
-        entry_username = customtkinter.CTkEntry(self, placeholder_text="username")
+        entry_username = customtkinter.CTkEntry(self, placeholder_text="username", font=("Trebuchet MS", 15))
         entry_username.grid(row=2, column=2, pady=5)
         self.data.append(entry_username)
 
-        label_password = customtkinter.CTkLabel(self, text="Password: ")
+        label_password = customtkinter.CTkLabel(self, text="Password: ", font=("Trebuchet MS", 15))
         label_password.grid(row=3, column=1, pady=2)
 
-        entry_password = customtkinter.CTkEntry(self, placeholder_text="password", show="*")
+        entry_password = customtkinter.CTkEntry(self, placeholder_text="password", show="*", font=("Trebuchet MS", 15))
         entry_password.grid(row=3, column=2, pady=2)
         self.data.append(entry_password)
 
-        login_button = customtkinter.CTkButton(self, text="Login", command=lambda: self.log_user
-            (controller, incorrect_data))
+        login_button = customtkinter.CTkButton(self, text="Login",text_color="#3E4B3C", command=lambda: self.log_user
+            (controller, incorrect_data), fg_color="#91D53E", hover_color="#689F33", border_color="#3E4B3C", height=30, border_width=1)
         login_button.grid(row=4, column=2, pady=2)
 
-        sign_up_button = customtkinter.CTkButton(self, text="Sign up", command=lambda: controller.show_frame(SignUp))
+        sign_up_button = customtkinter.CTkButton(self, text="Sign up",text_color="#3E4B3C", command=lambda: controller.show_frame(SignUp),
+                                                 fg_color="#91D53E", hover_color="#689F33", border_color="#3E4B3C", height=30, border_width=1)
         sign_up_button.grid(row=5, column=2, pady=2)
 
         incorrect_data = customtkinter.CTkLabel(self, text="INCORRECT USERNAME OR PASSWORD", text_color="red")
@@ -67,7 +68,7 @@ class Login(customtkinter.CTkFrame):
         database_tuple = cursor.fetchall()
 
         if len(database_tuple) == 0:
-            label.grid(row=6, column=2)
+            label.grid(row=6, column=1, columnspan=2)
             return None
 
         try:
@@ -82,7 +83,7 @@ class Login(customtkinter.CTkFrame):
 
             kdf.verify(self.data[1].get().encode(), database_tuple[0][1])
         except cryptography.exceptions.InvalidKey:
-            label.grid(row=6, column=2)
+            label.grid(row=6, column=1, columnspan=2)
 
         else:
             # close cursor set the username value and show main page.

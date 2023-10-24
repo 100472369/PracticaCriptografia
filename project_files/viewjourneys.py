@@ -15,12 +15,17 @@ class ViewJourneys(customtkinter.CTkFrame):
         self.decrypted_data = []
         customtkinter.CTkFrame.__init__(self, parent)
         # buttons
-        button = customtkinter.CTkButton(self, text="SHOW JOURNEYS", command=lambda: self.run_query(controller))
-        button.grid(row=1, column=3, pady=5)
+        button = customtkinter.CTkButton(self, text="SHOW JOURNEYS", text_color="#3E4B3C",
+                                         command=lambda: self.run_query(controller),
+                                         fg_color="#91D53E", hover_color="#689F33", border_color="#3E4B3C",
+                                         height=30, border_width=1)
+        button.grid(row=1, column=0, pady=(20,5), padx=(480,100), columnspan=5)
 
-        return_menu = customtkinter.CTkButton(self, text="RETURN TO MAIN MENU",
-                                              command=lambda: controller.show_frame(mainpage.MainPage))
-        return_menu.grid(row=2, column=3, pady=5)
+        return_menu = customtkinter.CTkButton(self, text="RETURN TO MAIN MENU", text_color="WHITE",
+                                              command=lambda: controller.show_frame(mainpage.MainPage),
+                                              fg_color="#91D53E", hover_color="#689F33", border_color="WHITE",
+                                              height=30, border_width=1)
+        return_menu.grid(row=2, column=0, pady=(4, 15), padx=(480,100), columnspan=5)
 
     def run_query(self, controller):
         """This funtion will display all the user's trips."""
@@ -42,18 +47,16 @@ class ViewJourneys(customtkinter.CTkFrame):
                            "Elevation(meters)", "City"]
 
         for i in range(len(attribute_names)):
-            entry = customtkinter.CTkLabel(self, text=f"{attribute_names[i]}", font=("Arial", 15))
-            entry.place(relx=0.5, rely=0.5)
-            entry.grid(row=3, column=i, sticky='nsew', padx=10)
+            entry = customtkinter.CTkLabel(self, text=f"{attribute_names[i]}", font=("Arial", 15, 'bold'), width=90)
+            entry.grid(row=3, column=i, padx=(20,20))
         # display the decrypted data
         if len(self.return_query) > 0:
             self.decrypt_data()
             i = 4
             for item in self.decrypted_data:
                 for j in range(len(item)):
-                    label = customtkinter.CTkLabel(self, text=f"{item[j]}", font=("Arial", 12))
-                    label.place(relx=0.5, rely=0.5)
-                    label.grid(row=i, column=j, sticky='nsew', padx=5)
+                    label = customtkinter.CTkLabel(self, text=f"{item[j]}", font=("Arial", 14))
+                    label.grid(row=i, column=j)
                 i += 1
 
             #  write message in log

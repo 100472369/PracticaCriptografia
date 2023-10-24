@@ -20,15 +20,18 @@ class AddJourney(customtkinter.CTkFrame):
         self.incorrect_labels = []
 
         # instructions
-        instructions_1 = customtkinter.CTkLabel(self, text="To insert type the correct data type in each entry.")
-        instructions_1.grid(row=1, column=2, columnspan=3)
+        instructions_1 = customtkinter.CTkLabel(self, text="To insert type the correct data type in each entry.",
+                                                font=("Arial", 18, 'bold'))
+        instructions_1.grid(row=1, column=0, columnspan=7, pady=(100,2), padx=(10, 10))
         instructions_2 = customtkinter.CTkLabel(self,
                                                 text="START: text, FINISH: text, "
-                                                     "DISTANCE: number(kilometers), ACTIVITY TYPE: text")
-        instructions_2.grid(row=2, column=2, columnspan=3)
+                                                     "DISTANCE: number(kilometers), ACTIVITY TYPE: text",
+                                                font=("Arial", 16))
+        instructions_2.grid(row=2, column=0, columnspan=7, pady=2, padx=(10, 10))
         instructions_3 = customtkinter.CTkLabel(self,
-                                                text="DURATION: number (hours), ELEVATION: number (meters), CITY: TEXT")
-        instructions_3.grid(row=3, column=2, columnspan=3)
+                                                text="DURATION: number (hours), ELEVATION: number (meters), CITY: text",
+                                                font=("Arial", 16))
+        instructions_3.grid(row=3, column=0, columnspan=7, pady=(2, 10), padx=(10, 10))
 
         # this is used for deleting the entries once an operation is complete
         entry_list = []
@@ -38,20 +41,25 @@ class AddJourney(customtkinter.CTkFrame):
         # create labels and entries
         j = 0
         for item in list_values:
-            label = customtkinter.CTkLabel(self, text=f"{item}")
+            label = customtkinter.CTkLabel(self, text=f"{item}", font=("Arial", 14, 'bold'))
             label.grid(row=4, column=j)
             entry = customtkinter.CTkEntry(self, placeholder_text="attribute",
-                                           textvariable=self.attribute_dict[f"{item}"])
-            entry.grid(row=5, column=j)
+                                           textvariable=self.attribute_dict[f"{item}"],
+                                           width=144)
+            entry.grid(row=5, column=j, pady=5, padx=(2,2))
             entry_list.append(entry)
             j += 1
         # extra buttons
-        button = customtkinter.CTkButton(self, text="ADD JOURNEY",
-                                         command=lambda: self.add_to_database(controller, entry_list))
-        button.grid(row=6, column=3, pady=5)
+        button = customtkinter.CTkButton(self, text="ADD JOURNEY", text_color="#3E4B3C",
+                                         command=lambda: self.add_to_database(controller, entry_list),
+                                         fg_color="#91D53E", hover_color="#689F33", border_color="#3E4B3C",
+                                         height=30, border_width=1)
+        button.grid(row=6, column=3, pady=5,padx=(10, 10))
 
-        return_button = customtkinter.CTkButton(self, text="RETURN TO MAIN MENU",
-                                                command=lambda: self.show_main_menu(controller, entry_list))
+        return_button = customtkinter.CTkButton(self, text="RETURN TO MAIN MENU", text_color="WHITE",
+                                                command=lambda: self.show_main_menu(controller, entry_list),
+                                                fg_color="#91D53E", hover_color="#689F33", border_color="WHITE",
+                                                height=30, border_width=1)
         return_button.grid(row=7, column=3, pady=5)
 
         # for returning errors in insertion
@@ -60,6 +68,7 @@ class AddJourney(customtkinter.CTkFrame):
                       "DISTANCE OR DURATION CAN NOT BE NEGATIVE"]
         for item in error_text:
             label = customtkinter.CTkLabel(self, text=f"{item}", text_color="red")
+
             self.incorrect_labels.append(label)
 
     def add_to_database(self, controller, entry_list):
@@ -140,14 +149,14 @@ class AddJourney(customtkinter.CTkFrame):
                                       float(self.attribute_dict["elevation"].get()), self.attribute_dict["city"].get(),
                                       get_value())
         except ValueError:
-            self.incorrect_labels[0].grid(row=8, column=3)
+            self.incorrect_labels[0].grid(row=8, column=2, columnspan=3)
             return False
         for i in tuple_check_parameters:
             if not str(i).strip():
-                self.incorrect_labels[1].grid(row=8, column=3)
+                self.incorrect_labels[1].grid(row=8, column=2, columnspan=3)
                 return False
         if tuple_check_parameters[2] < 0 or tuple_check_parameters[4] < 0:
-            self.incorrect_labels[2].grid(row=8, column=3)
+            self.incorrect_labels[2].grid(row=8, column=2, columnspan=3)
             return False
         return True
 
