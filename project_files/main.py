@@ -16,7 +16,7 @@ class Tkinterapp(customtkinter.CTk):
         customtkinter.CTk.__init__(self, *args, **kwargs)
 
         # give title to app
-        self.title("Bycycle Land")
+        self.title("Bicycle Land")
         # change geometry
         self.geometry("1050x600")
 
