@@ -19,13 +19,13 @@ class ViewJourneys(customtkinter.CTkFrame):
                                          command=lambda: self.run_query(controller),
                                          fg_color="#91D53E", hover_color="#689F33", border_color="#3E4B3C",
                                          height=30, border_width=1)
-        button.grid(row=1, column=0, pady=(20,5), padx=(480,100), columnspan=5)
+        button.grid(row=1, column=0, pady=(20, 5), padx=(480, 100), columnspan=5)
 
         return_menu = customtkinter.CTkButton(self, text="RETURN TO MAIN MENU", text_color="WHITE",
                                               command=lambda: controller.show_frame(mainpage.MainPage),
                                               fg_color="#91D53E", hover_color="#689F33", border_color="WHITE",
                                               height=30, border_width=1)
-        return_menu.grid(row=2, column=0, pady=(4, 15), padx=(480,100), columnspan=5)
+        return_menu.grid(row=2, column=0, pady=(4, 15), padx=(480, 100), columnspan=5)
 
     def run_query(self, controller):
         """This funtion will display all the user's trips."""
@@ -48,7 +48,7 @@ class ViewJourneys(customtkinter.CTkFrame):
 
         for i in range(len(attribute_names)):
             entry = customtkinter.CTkLabel(self, text=f"{attribute_names[i]}", font=("Arial", 15, 'bold'), width=90)
-            entry.grid(row=3, column=i, padx=(20,20))
+            entry.grid(row=3, column=i, padx=(20, 20))
         # display the decrypted data
         if len(self.return_query) > 0:
             self.decrypt_data()

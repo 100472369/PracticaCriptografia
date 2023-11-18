@@ -37,13 +37,13 @@ class MainPage(customtkinter.CTkFrame):
         view_journeys.grid(pady=5)
 
         confirmation = customtkinter.CTkLabel(self, text="ARE YOU SURE?", text_color="RED")
-        yes_button = customtkinter.CTkButton(self, text="YES",text_color="RED",
+        yes_button = customtkinter.CTkButton(self, text="YES", text_color="RED",
                                              command=lambda: self.delete_user(controller, yes_button,
                                                                               no_button, confirmation),
-                                             fg_color = "WHITE", hover_color = "#FDFACB", border_color = "RED",
-                                             height = 30, border_width = 1)
+                                             fg_color="WHITE", hover_color="#FDFACB", border_color="RED",
+                                             height=30, border_width=1)
 
-        no_button = customtkinter.CTkButton(self, text="NO",text_color="GREEN", command=lambda:
+        no_button = customtkinter.CTkButton(self, text="NO", text_color="GREEN", command=lambda:
             self.remove_confirmation(confirmation, yes_button, no_button),
                                             fg_color="WHITE", hover_color="#FDFACB", border_color="GREEN",
                                             height=30, border_width=1)
@@ -77,8 +77,6 @@ class MainPage(customtkinter.CTkFrame):
         # for executing queries with foreign keys
         cursor.execute("""PRAGMA foreign_keys=ON;""")
         # removable of data and user
-        sql = """delete from bike_routes where username = ?"""
-        cursor.execute(sql, [get_value()])
 
         sql = """delete from users where username =?;"""
         cursor.execute(sql, [get_value()])

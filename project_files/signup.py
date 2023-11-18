@@ -2,11 +2,17 @@ import re
 import sqlite3
 import os
 import customtkinter
-from mainpage import MainPage
-from settings import set_value, set_encryption_key, get_value
+from settings import set_value, get_value
+# used for deriving
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
+# used for encrypting
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 import login
+# used for signature
+
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 
 class SignUp(customtkinter.CTkFrame):
@@ -27,7 +33,8 @@ class SignUp(customtkinter.CTkFrame):
 
         specifications_username = customtkinter.CTkLabel(self, text="The username should be at least 6 characters "
                                                               "long and should only contain"
-                                                              "numbers, letters, hyphens and underscores.", font=("Arial", 15, 'bold'))
+                                                              "numbers, letters, hyphens and underscores.",
+                                                         font=("Arial", 15, 'bold'))
         specifications_username.grid(row=2, column=1, columnspan=5, pady=4, padx=(95, 100))
         username = customtkinter.CTkLabel(self, text="Username:", font=("Trebuchet MS", 16))
         username.grid(row=3, column=2, pady=2)
@@ -47,12 +54,12 @@ class SignUp(customtkinter.CTkFrame):
         phone_entry.grid(row=5, column=4, pady=2)
         self.data["phone"] = phone_entry
 
-        specifications_password = customtkinter.CTkLabel(self,text=
-                                                              "The password should be at least 8 characters "
+        specifications_password = customtkinter.CTkLabel(self, text="The password should be at least 8 characters "
                                                               "long and should contain:\n a "
                                                               "number, a lowercase letter,"
                                                               "an uppercase letter and a special symbol "
-                                                              "! # $ % & * + - , . : ; ? @ ~", font=("Arial", 15, 'bold'))
+                                                              "! # $ % & * + - , . : ; ? @ ~",
+                                                         font=("Arial", 15, 'bold'))
         specifications_password.grid(row=6, column=1, columnspan=5, pady=(20, 4))
 
         password = customtkinter.CTkLabel(self, text="Password:", font=("Trebuchet MS", 16))
@@ -63,7 +70,8 @@ class SignUp(customtkinter.CTkFrame):
 
         repeat_password = customtkinter.CTkLabel(self, text="Repeat password:", font=("Trebuchet MS", 16))
         repeat_password.grid(row=8, column=2, pady=2)
-        repeat_password_entry = customtkinter.CTkEntry(self, placeholder_text="password", show="*", font=("Trebuchet MS", 15))
+        repeat_password_entry = customtkinter.CTkEntry(self, placeholder_text="password", show="*",
+                                                       font=("Trebuchet MS", 15))
         repeat_password_entry.grid(row=8, column=4, pady=2)
         self.data["repeat_password"] = repeat_password_entry
 
@@ -124,7 +132,7 @@ class SignUp(customtkinter.CTkFrame):
         sql = ("create table if not exists users "
                "(username TEXT not null constraint users_pk primary key, password BLOB not null,"
                "email BlOB not null, phone_number BLOB not null,"
-               "salt BLOB not null, nonce_email BLOB not null,"
+               "salt_password BLOB not null, nonce_email BLOB not null, salt_key BlOB not null,"
                "nonce_phone_number BLOB not null);")
         cursor.execute(sql)
 
@@ -140,10 +148,12 @@ class SignUp(customtkinter.CTkFrame):
             incorrect_labels[5].grid(row=11, column=4)
 
         else:
+            # after check set the username value
+            set_value(self.data["username"].get())
             # derive and encrypt items
             self.derive_password()
             self.encrypt_data()
-
+            self.sign_username(controller, conn, cursor)
             # insert into table and log user
             sql = """INSERT INTO users (username, email, phone_number, 
             password, salt_password, nonce_email, nonce_phone_number, salt_key) 
@@ -171,7 +181,7 @@ class SignUp(customtkinter.CTkFrame):
             for item in self.data.values():
                 item.delete(0, "end")
             # show main page
-            controller.show_frame(MainPage)
+            controller.show_frame(login.Login)
 
     def derive_password(self):
         """This function will generate a salt and KDF to derive the user's password."""
@@ -217,5 +227,48 @@ class SignUp(customtkinter.CTkFrame):
             encrypted_item = chacha.encrypt(self.nonce[f"{item}"], self.data[f"{item}"].get().encode(), None)
             self.manipulated_data[f"{item}"] = encrypted_item
 
-        # store key as temporary global variable
-        set_encryption_key(key)
+    def sign_username(self, controller, conn, cursor):
+        # sql initialize
+        # create table
+        sql = """create table if not exists signature
+            (
+                username   TEXT
+                    constraint signature_users_username_fk
+                        references users
+                        on update cascade on delete cascade,
+                public_key BLOB not null,
+                signature  BLOB not null
+            );"""
+        cursor.execute(sql)
+        # generate private key
+        private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+        )
+        # generate byte message
+        message = get_value().encode("utf-8")
+        # generate signature
+        signature = self.create_signature(private_key, message)
+        # generate public key object and public key text string
+        public_key = private_key.public_key()
+        public_key_string = public_key.public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo)
+        sql = """INSERT INTO signature (username, public_key, signature) VALUES (?, ?, ?)"""
+        cursor.execute(sql, [get_value(), public_key_string, signature])
+        conn.commit()
+
+        # write message in log
+        messages = [f'Signup information for user: {get_value()}',
+                    "Successfully signed username value",
+                    "Algorithms used: RSA. Length of key: 2048 B\n"]
+        controller.write_log(messages)
+
+    def create_signature(self, private_key, message):
+        signature = private_key.sign(
+            message,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return signature

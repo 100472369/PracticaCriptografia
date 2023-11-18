@@ -22,7 +22,7 @@ class AddJourney(customtkinter.CTkFrame):
         # instructions
         instructions_1 = customtkinter.CTkLabel(self, text="To insert type the correct data type in each entry.",
                                                 font=("Arial", 18, 'bold'))
-        instructions_1.grid(row=1, column=0, columnspan=7, pady=(100,2), padx=(10, 10))
+        instructions_1.grid(row=1, column=0, columnspan=7, pady=(100, 2), padx=(10, 10))
         instructions_2 = customtkinter.CTkLabel(self,
                                                 text="START: text, FINISH: text, "
                                                      "DISTANCE: number(kilometers), ACTIVITY TYPE: text",
@@ -46,7 +46,7 @@ class AddJourney(customtkinter.CTkFrame):
             entry = customtkinter.CTkEntry(self, placeholder_text="attribute",
                                            textvariable=self.attribute_dict[f"{item}"],
                                            width=144)
-            entry.grid(row=5, column=j, pady=5, padx=(2,2))
+            entry.grid(row=5, column=j, pady=5, padx=(2, 2))
             entry_list.append(entry)
             j += 1
         # extra buttons
@@ -54,7 +54,7 @@ class AddJourney(customtkinter.CTkFrame):
                                          command=lambda: self.add_to_database(controller, entry_list),
                                          fg_color="#91D53E", hover_color="#689F33", border_color="#3E4B3C",
                                          height=30, border_width=1)
-        button.grid(row=6, column=3, pady=5,padx=(10, 10))
+        button.grid(row=6, column=3, pady=5, padx=(10, 10))
 
         return_button = customtkinter.CTkButton(self, text="RETURN TO MAIN MENU", text_color="WHITE",
                                                 command=lambda: self.show_main_menu(controller, entry_list),
@@ -97,13 +97,14 @@ class AddJourney(customtkinter.CTkFrame):
                 duration      REAL not null,
                 elevation     REAL not null,
                 city          BLOB not null,
-                username      TEXT not null,
+                username      TEXT not null
+                constraint bike_routes_users_username_fk
+                            references users
+                            on delete cascade on update cascade ,
                 nonce_start BLOB not null,
                 nonce_finish BLOB not null,
                 nonce_activity_type BLOB not null,
-                nonce_city BLOB not null 
-                        constraint bike_routes_users_username_fk
-                            references users
+                nonce_city BLOB not null                        
                 );""")
         cursor.execute(sql)
         # check parameters
