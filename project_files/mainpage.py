@@ -1,10 +1,12 @@
 import customtkinter
+# import frames
 from addjourney import AddJourney
 from viewjourneys import ViewJourneys
-from settings import get_value
+import login
+# functions used
 import os
 import sqlite3
-import login
+from settings import get_value
 
 
 class MainPage(customtkinter.CTkFrame):
@@ -67,7 +69,7 @@ class MainPage(customtkinter.CTkFrame):
         no.grid_remove()
 
     def delete_user(self, controller, yes, no, confirmation):
-        """This function will delete the user as well as their trips from the database.
+        """This function will delete the user signature and their trips from the database.
         It will then return the user to the login frame."""
         cwd = os.getcwd()
         sqlite_file = cwd + r"/project_files/database_project.db"
@@ -76,7 +78,7 @@ class MainPage(customtkinter.CTkFrame):
 
         # for executing queries with foreign keys
         cursor.execute("""PRAGMA foreign_keys=ON;""")
-        # removable of data and user
+        # removal of user, signature, trips
 
         sql = """delete from users where username =?;"""
         cursor.execute(sql, [get_value()])

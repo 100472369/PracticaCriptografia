@@ -1,7 +1,9 @@
 import customtkinter
 import os
 import sqlite3
+# import frames
 import mainpage
+# used to decrypt data
 from settings import get_value, get_encryption_key
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 

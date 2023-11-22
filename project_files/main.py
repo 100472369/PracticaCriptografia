@@ -1,10 +1,13 @@
+# GUI
 import customtkinter
+# import the different modules
 from login import Login
 from signup import SignUp
 from mainpage import MainPage
 from addjourney import AddJourney
 from viewjourneys import ViewJourneys
 import logging
+# used in write_log function
 import os
 from settings import get_value
 

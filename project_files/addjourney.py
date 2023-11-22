@@ -1,7 +1,10 @@
 import customtkinter
+# general purpose functions
 import os
 import sqlite3
+# import frames
 import mainpage
+# used to encrypt data
 from settings import get_value, get_encryption_key
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 
@@ -79,6 +82,7 @@ class AddJourney(customtkinter.CTkFrame):
         for item in self.incorrect_labels:
             item.grid_remove()
 
+        # sql database cursor
         cwd = os.getcwd()
         sqlite_file = cwd + r"/project_files/database_project.db"
         conn = sqlite3.connect(sqlite_file)

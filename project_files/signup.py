@@ -1,3 +1,4 @@
+# general purpose functions
 import re
 import sqlite3
 import os
@@ -7,6 +8,7 @@ from settings import set_value, get_value
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 # used for encrypting
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
+# used for changing frame
 import login
 
 
@@ -143,7 +145,7 @@ class SignUp(customtkinter.CTkFrame):
             incorrect_labels[5].grid(row=11, column=4)
 
         else:
-            # after check set the username value
+            # set the global username value
             set_value(self.data["username"].get())
             # derive and encrypt items
             self.derive_password()
@@ -162,10 +164,7 @@ class SignUp(customtkinter.CTkFrame):
             conn.commit()
             cursor.close()
 
-            set_value(self.data["username"].get())
-
             # write message in log
-            #  write message in log
             messages = [f"Signup information for user: {get_value()}",
                         "Successfully encrypted and derived user data.",
                         "Algorithms used: ChaCha20, Scrypt. Length of key: 32\n"]
@@ -196,7 +195,7 @@ class SignUp(customtkinter.CTkFrame):
             r=8,
             p=1,
         )
-        # encrypt password
+        # derive password
 
         return kdf.derive(self.data["password"].get().encode())
 
