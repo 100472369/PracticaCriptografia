@@ -260,10 +260,8 @@ class Login(customtkinter.CTkFrame):
         file = source_path + f"/A/{get_value()}cert.pem"
         if not os.path.exists(file):
             # run openssl commands
-            subprocess.run(f"""cd {source_path}/AC2; openssl ca -in 
-            ../A/{get_value()}req.pem -notext -config ./openssl_AC2-461170.cnf""", shell=True)
-            subprocess.run(f"""mv {source_path}/AC2/nuevoscerts/* 
-            {source_path}/AC2/nuevoscerts/{get_value()}cert.pem""", shell=True)
+            subprocess.run(f'cd {source_path}/AC2; openssl ca -in ../A/{get_value()}req.pem -notext -config ./openssl_AC2-461170.cnf', shell=True)
+            subprocess.run(f'mv {source_path}/AC2/nuevoscerts/* {source_path}/AC2/nuevoscerts/{get_value()}cert.pem', shell=True)
             subprocess.run(f'mv {source_path}/AC2/nuevoscerts/{get_value()}cert.pem {source_path}/A', shell=True)
 
         # write certificate generation message in log
