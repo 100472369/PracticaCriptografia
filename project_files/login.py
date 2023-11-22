@@ -7,11 +7,17 @@ from signup import SignUp
 from mainpage import MainPage
 from settings import set_value, set_encryption_key, get_value
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
-# used for signature verification
-from cryptography.hazmat.primitives.serialization import load_pem_public_key
+# used for signature creation and verification
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.serialization import PublicFormat, PrivateFormat, BestAvailableEncryption
+from cryptography.hazmat.primitives.serialization import load_pem_public_key, load_pem_private_key
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
-
+# used for generating and verifying certificates
+from cryptography import x509
+from cryptography.x509.oid import NameOID
+from cryptography.hazmat.primitives.serialization import Encoding
+import subprocess
 
 class Login(customtkinter.CTkFrame):
     """This is the login frame for our app."""
@@ -88,7 +94,14 @@ class Login(customtkinter.CTkFrame):
         else:
             # set username value
             set_value(self.data[0].get())
+            # create signature
+            self.sign_username(controller, conn, cursor)
+            # verify username signature
             self.verify_signature(cursor, controller)
+            # obtain certificate
+            self.obtain_certificate(cursor, controller)
+            # verify certificate
+            self.verify_certificate(controller)
             # close cursor set the username value and show main page.
             cursor.close()
             # remove text from entries
@@ -120,7 +133,57 @@ class Login(customtkinter.CTkFrame):
             p=1,
         )
         return kdf
+    def sign_username(self, controller, conn, cursor):
+        # sql initialize
+        # create table
+        sql = """create table if not exists signature
+            (
+                username   TEXT
+                    constraint signature_users_username_fk
+                        references users
+                        on update cascade on delete cascade,
+                public_key BLOB not null,
+                signature  BLOB not null
+            );"""
+        cursor.execute(sql)
+        try:
+            # generate private key
+            private_key = rsa.generate_private_key(
+                public_exponent=65537,
+                key_size=2048,
+            )
+            # generate byte message
+            message = get_value().encode("utf-8")
+            # generate signature
+            signature = self.create_signature(private_key, message)
+            # generate public key object
+            public_key = private_key.public_key()
+            # serialization of public key
+            public_key_string = public_key.public_bytes(encoding=Encoding.PEM, format=PublicFormat.SubjectPublicKeyInfo)
+            # serialization of private key
+            private_key_string = private_key.private_bytes(encoding=Encoding.PEM, format=PrivateFormat.TraditionalOpenSSL,
+                                      encryption_algorithm=BestAvailableEncryption(self.data[1].get().encode()))
 
+            sql = """INSERT INTO signature (username, public_key, signature, private_key) VALUES (?, ?, ?, ?)"""
+            cursor.execute(sql, [get_value(), public_key_string, signature, private_key_string])
+            conn.commit()
+        except sqlite3.IntegrityError:
+            # write message in log
+            messages = [f'Login information for user: {get_value()}',
+                        "Successfully signed username value",
+                        "Algorithms used: RSA. Length of key: 2048 B\n"]
+            controller.write_log(messages)
+
+    def create_signature(self, private_key, message):
+        signature = private_key.sign(
+            message,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return signature
     def verify_signature(self, cursor, controller):
         sql = """select username, public_key, signature from signature where username=?;"""
         cursor.execute(sql, [get_value()])
@@ -141,10 +204,67 @@ class Login(customtkinter.CTkFrame):
                         "Successfully verified signature.", "Algorithm used: RSA. \n"]
             controller.write_log(messages)
 
-            # show main page
-            controller.show_frame(MainPage)
         except cryptography.exceptions.InvalidSignature:
             messages = [f"Login information for user: {get_value()}",
                         "Signature verification failed.",
                         "Check if user has signature entry in signature table of database. \n"]
             controller.write_log(messages)
+
+
+    def obtain_certificate(self, cursor, controller):
+        sql = """select username, public_key, signature, private_key from signature where username=?;"""
+        cursor.execute(sql, [get_value()])
+        data = cursor.fetchone()
+        private_key = load_pem_private_key(data=data[3], password=self.data[1].get().encode())
+        # crear certificado
+        # Generate a CSR
+        csr = x509.CertificateSigningRequestBuilder().subject_name(x509.Name([
+            # Provide various details about who we are.
+            x509.NameAttribute(NameOID.COUNTRY_NAME, "ES"),
+            x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "Madrid"),
+            x509.NameAttribute(NameOID.LOCALITY_NAME, "Madrid"),
+            x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Bicycle Land"),
+            x509.NameAttribute(NameOID.COMMON_NAME, f"{get_value()}"),
+        ])).add_extension(
+            x509.SubjectAlternativeName([
+                # Describe what sites we want this certificate for.
+                x509.DNSName("bicycleland.com"),
+                x509.DNSName("www.bicycleland.com"),
+                x509.DNSName("subdomain.bicycleland.com"),
+            ]),
+            critical=False,
+            # Sign the CSR with our private key.
+        ).sign(private_key, hashes.SHA256())
+        # Write our CSR out to disk.
+        path = os.getcwd() + f"/A/{get_value()}req.pem"
+        with open(f"{path}", "wb") as f:
+            f.write(csr.public_bytes(Encoding.PEM))
+
+        # pasar de un request a el certificado del usuario
+
+        source_path = os.getcwd()
+        # path al archivo por si ya fue verificado
+        file = source_path + f"/A/{get_value()}cert.pem"
+        if not os.path.exists(file):
+            subprocess.run(f'cd {source_path}/AC2; openssl ca -in ../A/{get_value()}req.pem -notext -config ./openssl_AC2-461170.cnf', shell=True)
+            subprocess.run(f'mv {source_path}/AC2/nuevoscerts/* {source_path}/AC2/nuevoscerts/{get_value()}cert.pem', shell=True)
+            subprocess.run(f'mv {source_path}/AC2/nuevoscerts/{get_value()}cert.pem {source_path}/A', shell=True)
+
+
+        messages = [f"Login information for user: {get_value()}",
+                    "Successfully generated user certificate.", "Created using x509 and OpenSSL. \n"]
+        controller.write_log(messages)
+
+
+    def verify_certificate(self, controller):
+        path = os.getcwd()
+        # certificar A
+        subprocess.run(f'cd {path}/A; openssl verify -CAfile certs.pem {get_value()}cert.pem', shell=True)
+        # certificar AC2
+        subprocess.run(f'cd {path}/AC2; openssl verify -CAfile ../AC1/ac1cert.pem ac2cert.pem', shell=True)
+        # certificar AC!
+        subprocess.run(f'cd {path}/AC1; openssl verify -CAfile ac1cert.pem ac1cert.pem', shell=True)
+
+        messages = [f"Login information for user: {get_value()}",
+                    "Successfully validated user certificate.", "Achieved using OpenSSL commands.\n"]
+        controller.write_log(messages)

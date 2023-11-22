@@ -8,11 +8,6 @@ from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 # used for encrypting
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 import login
-# used for signature
-
-from cryptography.hazmat.primitives.asymmetric import rsa, padding
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 
 class SignUp(customtkinter.CTkFrame):
@@ -153,7 +148,6 @@ class SignUp(customtkinter.CTkFrame):
             # derive and encrypt items
             self.derive_password()
             self.encrypt_data()
-            self.sign_username(controller, conn, cursor)
             # insert into table and log user
             sql = """INSERT INTO users (username, email, phone_number, 
             password, salt_password, nonce_email, nonce_phone_number, salt_key) 
@@ -227,48 +221,4 @@ class SignUp(customtkinter.CTkFrame):
             encrypted_item = chacha.encrypt(self.nonce[f"{item}"], self.data[f"{item}"].get().encode(), None)
             self.manipulated_data[f"{item}"] = encrypted_item
 
-    def sign_username(self, controller, conn, cursor):
-        # sql initialize
-        # create table
-        sql = """create table if not exists signature
-            (
-                username   TEXT
-                    constraint signature_users_username_fk
-                        references users
-                        on update cascade on delete cascade,
-                public_key BLOB not null,
-                signature  BLOB not null
-            );"""
-        cursor.execute(sql)
-        # generate private key
-        private_key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=2048,
-        )
-        # generate byte message
-        message = get_value().encode("utf-8")
-        # generate signature
-        signature = self.create_signature(private_key, message)
-        # generate public key object and public key text string
-        public_key = private_key.public_key()
-        public_key_string = public_key.public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo)
-        sql = """INSERT INTO signature (username, public_key, signature) VALUES (?, ?, ?)"""
-        cursor.execute(sql, [get_value(), public_key_string, signature])
-        conn.commit()
 
-        # write message in log
-        messages = [f'Signup information for user: {get_value()}',
-                    "Successfully signed username value",
-                    "Algorithms used: RSA. Length of key: 2048 B\n"]
-        controller.write_log(messages)
-
-    def create_signature(self, private_key, message):
-        signature = private_key.sign(
-            message,
-            padding.PSS(
-                mgf=padding.MGF1(hashes.SHA256()),
-                salt_length=padding.PSS.MAX_LENGTH
-            ),
-            hashes.SHA256()
-        )
-        return signature
