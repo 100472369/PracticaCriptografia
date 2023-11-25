@@ -256,12 +256,12 @@ class Login(customtkinter.CTkFrame):
 
         # turn the request into a certificate with openssl
         source_path = os.getcwd()
-        # route to the file in case it already exists
-        file = source_path + f"/A/{get_value()}cert.pem"
+        # create nuevoscerts if it does not exist
         nuevos_certs = source_path + "/AC2/nuevoscerts"
         if not os.path.exists(nuevos_certs):
             os.makedirs(nuevos_certs)
-        # create nuevoscerts if it does not exist
+        # route to the file in case it already exists
+        file = source_path + f"/A/{get_value()}cert.pem"
         if not os.path.exists(file):
             # run openssl commands
             subprocess.run(f'cd {source_path}/AC2; openssl ca -in ../A/{get_value()}req.pem -notext -config ./openssl_AC2-461170.cnf', shell=True)
