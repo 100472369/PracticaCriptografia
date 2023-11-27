@@ -249,7 +249,7 @@ class Login(customtkinter.CTkFrame):
             # Sign the CSR with our private key.
         ).sign(private_key, hashes.SHA256())
         # Write our CSR out to disk.
-        path = os.getcwd() + f"/A/{get_value()}req.pem"
+        path = os.getcwd() + f"/AC2/solicitudes/{get_value()}req.pem"
         with open(f"{path}", "wb") as f:
             f.write(csr.public_bytes(Encoding.PEM))
 
@@ -263,7 +263,8 @@ class Login(customtkinter.CTkFrame):
         file = source_path + f"/A/{get_value()}cert.pem"
         if not os.path.exists(file):
             # run openssl commands
-            subprocess.run(f'cd {source_path}/AC2; openssl ca -in ../A/{get_value()}req.pem -notext -config '
+            subprocess.run(f'cd {source_path}/AC2; openssl ca -in '
+                           f'../AC2/solicitudes/{get_value()}req.pem -notext -config '
                            f'./openssl_AC2-461170.cnf -passin env:certificate_password', shell=True)
             subprocess.run(f'mv {source_path}/AC2/nuevoscerts/* '
                            f'{source_path}/AC2/nuevoscerts/{get_value()}cert.pem', shell=True)
