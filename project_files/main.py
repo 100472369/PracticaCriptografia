@@ -77,6 +77,7 @@ class Tkinterapp(customtkinter.CTk):
         cursor = conn.cursor()
         return [conn, cursor]
 
+
 if __name__ == '__main__':
     os.environ["certificate_password"] = "Messi12345!"
     app = Tkinterapp()
