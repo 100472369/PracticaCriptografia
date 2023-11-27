@@ -69,10 +69,9 @@ class Login(customtkinter.CTkFrame):
         """this function will try to log the user and redirect to the main page.
         If not possible it wil display a red label error."""
         # initiate sql data
-        cwd = os.getcwd()
-        sqlite_file = cwd + r"/project_files/database_project.db"
-        conn = sqlite3.connect(sqlite_file)
-        cursor = conn.cursor()
+        sqlite = controller.initialize_sql()
+        conn = sqlite[0]
+        cursor = sqlite[1]
 
         # execute query
         sql = "select username, password, salt_password, salt_key FROM users where username=?"
@@ -264,8 +263,10 @@ class Login(customtkinter.CTkFrame):
         file = source_path + f"/A/{get_value()}cert.pem"
         if not os.path.exists(file):
             # run openssl commands
-            subprocess.run(f'cd {source_path}/AC2; openssl ca -in ../A/{get_value()}req.pem -notext -config ./openssl_AC2-461170.cnf', shell=True)
-            subprocess.run(f'mv {source_path}/AC2/nuevoscerts/* {source_path}/AC2/nuevoscerts/{get_value()}cert.pem', shell=True)
+            subprocess.run(f'cd {source_path}/AC2; openssl ca -in ../A/{get_value()}req.pem -notext -config '
+                           f'./openssl_AC2-461170.cnf -passin env:certificate_password', shell=True)
+            subprocess.run(f'mv {source_path}/AC2/nuevoscerts/* '
+                           f'{source_path}/AC2/nuevoscerts/{get_value()}cert.pem', shell=True)
             subprocess.run(f'mv {source_path}/AC2/nuevoscerts/{get_value()}cert.pem {source_path}/A', shell=True)
 
         # write certificate generation message in log

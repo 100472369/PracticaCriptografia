@@ -1,6 +1,4 @@
 import customtkinter
-import os
-import sqlite3
 # import frames
 import mainpage
 # used to decrypt data
@@ -32,10 +30,9 @@ class ViewJourneys(customtkinter.CTkFrame):
     def run_query(self, controller):
         """This funtion will display all the user's trips."""
         # create cursor and connect to database
-        cwd = os.getcwd()
-        sqlite_file = cwd + r"/project_files/database_project.db"
-        conn = sqlite3.connect(sqlite_file)
-        cursor = conn.cursor()
+        sqlite = controller.initialize_sql()
+        conn = sqlite[0]
+        cursor = sqlite[1]
         # for executing queries with foreign keys
         cursor.execute("""PRAGMA foreign_keys=ON;""")
         # run query

@@ -7,8 +7,10 @@ from mainpage import MainPage
 from addjourney import AddJourney
 from viewjourneys import ViewJourneys
 import logging
-# used in write_log function
+# used for sql
 import os
+import sqlite3
+# used in write_log function
 from settings import get_value
 
 
@@ -67,6 +69,15 @@ class Tkinterapp(customtkinter.CTk):
         logging.info(f"{messages[1]}")
         logging.info(f"{messages[2]}")
 
+    def initialize_sql(self):
+        """This function is used to create the sql cursor"""
+        cwd = os.getcwd()
+        sqlite_file = cwd + r"/project_files/database_project.db"
+        conn = sqlite3.connect(sqlite_file)
+        cursor = conn.cursor()
+        return [conn, cursor]
 
-app = Tkinterapp()
-app.mainloop()
+if __name__ == '__main__':
+    os.environ["certificate_password"] = "Messi12345!"
+    app = Tkinterapp()
+    app.mainloop()

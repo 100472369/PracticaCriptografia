@@ -1,6 +1,5 @@
 # general purpose functions
 import re
-import sqlite3
 import os
 import customtkinter
 from settings import set_value, get_value
@@ -121,10 +120,9 @@ class SignUp(customtkinter.CTkFrame):
         """This function will register the user.
         If the username already exists it will display a red warning label."""
         # sql initialize
-        cwd = os.getcwd()
-        sqlite_file = cwd + r"/project_files/database_project.db"
-        conn = sqlite3.connect(sqlite_file)
-        cursor = conn.cursor()
+        sqlite = controller.initialize_sql()
+        conn = sqlite[0]
+        cursor = sqlite[1]
         # create table
         sql = ("create table if not exists users "
                "(username TEXT not null constraint users_pk primary key, password BLOB not null,"

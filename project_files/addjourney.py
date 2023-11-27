@@ -1,7 +1,6 @@
 import customtkinter
 # general purpose functions
 import os
-import sqlite3
 # import frames
 import mainpage
 # used to encrypt data
@@ -83,10 +82,9 @@ class AddJourney(customtkinter.CTkFrame):
             item.grid_remove()
 
         # sql database cursor
-        cwd = os.getcwd()
-        sqlite_file = cwd + r"/project_files/database_project.db"
-        conn = sqlite3.connect(sqlite_file)
-        cursor = conn.cursor()
+        sqlite = controller.initialize_sql()
+        conn = sqlite[0]
+        cursor = sqlite[1]
 
         # for executing queries with foreign keys
         cursor.execute("""PRAGMA foreign_keys=ON;""")
