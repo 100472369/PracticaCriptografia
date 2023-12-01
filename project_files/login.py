@@ -24,6 +24,7 @@ import subprocess
 
 class Login(customtkinter.CTkFrame):
     """This is the login frame for our app."""
+
     def __init__(self, parent, controller):
         # variables
         self.data = []
@@ -53,7 +54,7 @@ class Login(customtkinter.CTkFrame):
         self.data.append(entry_password)
 
         login_button = customtkinter.CTkButton(self, text="Login", text_color="#3E4B3C", command=lambda: self.log_user
-            (controller, incorrect_data), fg_color="#91D53E", hover_color="#689F33", border_color="#3E4B3C", height=30,
+        (controller, incorrect_data), fg_color="#91D53E", hover_color="#689F33", border_color="#3E4B3C", height=30,
                                                border_width=1)
         login_button.grid(row=4, column=2, pady=2)
 
@@ -96,12 +97,12 @@ class Login(customtkinter.CTkFrame):
             set_value(self.data[0].get())
             # create signature
             self.sign_username(controller, conn, cursor)
-            # verify signature
-            self.verify_signature(cursor, controller)
             # obtain certificate
             self.obtain_certificate(cursor, controller)
             # verify certificate
             self.verify_certificate(controller)
+            # verify signature
+            self.verify_signature(cursor, controller)
             # close sqlite cursor
             cursor.close()
             # remove text from entries
@@ -165,7 +166,8 @@ class Login(customtkinter.CTkFrame):
             # serialization of private key
             private_key_string = private_key.private_bytes(encoding=Encoding.PEM,
                                                            format=PrivateFormat.TraditionalOpenSSL,
-                                      encryption_algorithm=BestAvailableEncryption(self.data[1].get().encode()))
+                                                           encryption_algorithm=BestAvailableEncryption(
+                                                               self.data[1].get().encode()))
             # insertion into database
             sql = """INSERT INTO signature (username, public_key, signature, private_key) VALUES (?, ?, ?, ?)"""
             cursor.execute(sql, [get_value(), public_key_string, signature, private_key_string])
@@ -192,15 +194,25 @@ class Login(customtkinter.CTkFrame):
 
     def verify_signature(self, cursor, controller):
         """This funtion will verify the user's signature."""
-        # get the signature data with sqlite3 query
-        sql = """select username, public_key, signature from signature where username=?;"""
+        # create public_keys directory if it does not exist
+        cwd = os.getcwd()
+        public_key_dir = cwd + "/A/public_keys"
+        if not os.path.exists(public_key_dir):
+            os.makedirs(public_key_dir)
+        # generate public key from certificate
+        subprocess.run(f"cd {cwd}/A; openssl x509 -pubkey -noout -in {get_value()}cert.pem  > "
+                       f" ./public_keys/{get_value()}pubkey.pem", shell=True)
+        # extract public key
+        with open(f"{public_key_dir}/{get_value()}pubkey.pem", "r+") as fp:
+            string = fp.read()
+        public_key = load_pem_public_key(string.encode())
+        # extract signature and message
+        sql = """select username,signature from signature where username=?;"""
         cursor.execute(sql, [get_value()])
         data = cursor.fetchone()
-        # get appropriate data
         message = data[0].encode(encoding="UTF-8")
-        public_key = load_pem_public_key(data[1])
-        signature = data[2]
-        # execute signature verification
+        signature = data[1]
+        # verify signature
         try:
             public_key.verify(signature,
                               message,
@@ -214,7 +226,6 @@ class Login(customtkinter.CTkFrame):
             messages = [f"Login information for user: {get_value()}",
                         "Successfully verified signature.", "Algorithm used: RSA. \n"]
             controller.write_log(messages)
-
         except cryptography.exceptions.InvalidSignature:
             # write verification failure in log
             messages = [f"Login information for user: {get_value()}",
@@ -224,34 +235,36 @@ class Login(customtkinter.CTkFrame):
 
     def obtain_certificate(self, cursor, controller):
         """This function will create a x509 certificate for the user."""
-        # get the signature data with sqlite3 query
-        sql = """select username, public_key, signature, private_key from signature where username=?;"""
-        cursor.execute(sql, [get_value()])
-        data = cursor.fetchone()
-        # get private key
-        private_key = load_pem_private_key(data=data[3], password=self.data[1].get().encode())
-        # Generate a CSR
-        csr = x509.CertificateSigningRequestBuilder().subject_name(x509.Name([
-            # Provide various details about who we are.
-            x509.NameAttribute(NameOID.COUNTRY_NAME, "ES"),
-            x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "Madrid"),
-            x509.NameAttribute(NameOID.LOCALITY_NAME, "Madrid"),
-            x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Bicycle Land"),
-            x509.NameAttribute(NameOID.COMMON_NAME, f"{get_value()}"),
-        ])).add_extension(
-            x509.SubjectAlternativeName([
-                # Describe what sites we want this certificate for.
-                x509.DNSName("bicycleland.com"),
-                x509.DNSName("www.bicycleland.com"),
-                x509.DNSName("subdomain.bicycleland.com"),
-            ]),
-            critical=False,
-            # Sign the CSR with our private key.
-        ).sign(private_key, hashes.SHA256())
-        # Write our CSR out to disk.
+        # generate CSR if there is not already one generated
         path = os.getcwd() + f"/AC2/solicitudes/{get_value()}req.pem"
-        with open(f"{path}", "wb") as f:
-            f.write(csr.public_bytes(Encoding.PEM))
+        if not os.path.exists(path):
+            # get the signature data with sqlite3 query
+            sql = """select username, public_key, signature, private_key from signature where username=?;"""
+            cursor.execute(sql, [get_value()])
+            data = cursor.fetchone()
+            # get private key
+            private_key = load_pem_private_key(data=data[3], password=self.data[1].get().encode())
+            # Generate a CSR
+            csr = x509.CertificateSigningRequestBuilder().subject_name(x509.Name([
+                # Provide various details about who we are.
+                x509.NameAttribute(NameOID.COUNTRY_NAME, "ES"),
+                x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "Madrid"),
+                x509.NameAttribute(NameOID.LOCALITY_NAME, "Madrid"),
+                x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Bicycle Land"),
+                x509.NameAttribute(NameOID.COMMON_NAME, f"{get_value()}"),
+            ])).add_extension(
+                x509.SubjectAlternativeName([
+                    # Describe what sites we want this certificate for.
+                    x509.DNSName("bicycleland.com"),
+                    x509.DNSName("www.bicycleland.com"),
+                    x509.DNSName("subdomain.bicycleland.com"),
+                ]),
+                critical=False,
+                # Sign the CSR with our private key.
+            ).sign(private_key, hashes.SHA256())
+            # Write our CSR out to disk.
+            with open(f"{path}", "wb") as f:
+                f.write(csr.public_bytes(Encoding.PEM))
 
         # turn the request into a certificate with openssl
         source_path = os.getcwd()
@@ -278,13 +291,37 @@ class Login(customtkinter.CTkFrame):
     def verify_certificate(self, controller):
         """This function will perform the chain validation of the certificates."""
         path = os.getcwd()
-        # certify A
-        subprocess.run(f'cd {path}/A; openssl verify -CAfile certs.pem {get_value()}cert.pem', shell=True)
-        # certify AC2
-        subprocess.run(f'cd {path}/AC2; openssl verify -CAfile ../AC1/ac1cert.pem ac2cert.pem', shell=True)
-        # certify AC1
-        subprocess.run(f'cd {path}/AC1; openssl verify -CAfile ac1cert.pem ac1cert.pem', shell=True)
-        # write certification message in log
+        # create user certificate object
+        with open(f"{path}/A/{get_value()}cert.pem", "rb") as fp:
+            user_string = fp.read()
+        user_cert = x509.load_pem_x509_certificate(user_string)
+        # create ac2 certificate object
+        with open(f"{path}/AC2/ac2cert.pem", "rb") as fp:
+            ac2_string = fp.read()
+        ac2_cert = x509.load_pem_x509_certificate(ac2_string)
+        # create ac1 certificate object
+        with open(f"{path}/AC1/ac1cert.pem", "rb") as fp:
+            ac1_string = fp.read()
+        ac1_cert = x509.load_pem_x509_certificate(ac1_string)
+        # perform chain validation
+        try:
+            # validate user's certificate signature with AC2 public key
+            ac2_cert.public_key().verify(
+                user_cert.signature,
+                user_cert.tbs_certificate_bytes,
+                padding.PKCS1v15(),
+                user_cert.signature_hash_algorithm
+            )
+            # validate AC2's certificate signature with AC1 public key
+            ac1_cert.public_key().verify(
+                ac2_cert.signature,
+                ac2_cert.tbs_certificate_bytes,
+                padding.PKCS1v15(),
+                ac2_cert.signature_hash_algorithm
+            )
+            # AC1 is self-signed so there is no need to validate it
+        except cryptography.exceptions.InvalidSignature:
+            pass
         messages = [f"Login information for user: {get_value()}",
                     "Successfully validated user certificate.", "Achieved using OpenSSL commands.\n"]
         controller.write_log(messages)
