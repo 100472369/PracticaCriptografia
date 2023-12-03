@@ -309,14 +309,14 @@ class Login(customtkinter.CTkFrame):
             ac2_cert.public_key().verify(
                 user_cert.signature,
                 user_cert.tbs_certificate_bytes,
-                padding.PKCS1v15(),
+                user_cert.signature_algorithm_parameters,
                 user_cert.signature_hash_algorithm
             )
             # validate AC2's certificate signature with AC1 public key
             ac1_cert.public_key().verify(
                 ac2_cert.signature,
                 ac2_cert.tbs_certificate_bytes,
-                padding.PKCS1v15(),
+                ac2_cert.signature_algorithm_parameters,
                 ac2_cert.signature_hash_algorithm
             )
             # AC1 is self-signed so there is no need to validate it
